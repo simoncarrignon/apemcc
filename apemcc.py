@@ -6,23 +6,23 @@
 import sys, getopt
 
 def main(argv):
-    inputfile = ''
-    outputfile = ''
+    n_ws = 0
+    t = 0
     try:
-        opts, args = getopt.getopt(argv,"hi:o:",["ifile=","ofile="])
+        opts, args = getopt.getopt(argv,"hw:t:",)
     except getopt.GetoptError:
-        print 'apemcc.py -wkshp <number of Workshop> -t <time>'
+        print 'apemcc.py -w <number of Workshop> -t <time>'
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print 'test.py -i <inputfile> -o <outputfile>'
+            print 'apemcc.py -w <number of Workshop> -t <time>'
             sys.exit()
-        elif opt in ("-i", "--ifile"):
-           inputfile = arg
-        elif opt in ("-o", "--ofile"):
-           outputfile = arg
-    print 'Input file is "', inputfile
-    print 'Output file is "', outputfile
+        elif opt == "-w":
+           n_ws = arg
+        elif opt == "-t":
+           max_time = arg
+    print n_ws, 'Workshop' 
+    print 'During ', t, 'iterations' 
 
 
 
