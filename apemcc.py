@@ -33,7 +33,7 @@ class Workshop(object):
     #writeProduce: write in a file the an amphora produced given the parameter of the workshop 
     def writeProduction(self,amount,t,res_file):
         for i in range(1,amount,1):
-            amph=str(t)+","+self.id+";amphora_"+ str(i)
+            amph=str(t)+","+self.id+",amphora_"+ str(i)
             for measure in self.all_measures:
                 param=self.all_measures[measure]
                 val=random.gauss(param["mean"],param["sd"])
@@ -43,12 +43,16 @@ class Workshop(object):
 
     #mutate: randomly change the parameter of production
     def mutate(self):
-        self.all_measures["exterior_diam"]["mean"] = self.all_measures["exterior_diam"]["mean"] + random.random()*2-2
-        self.all_measures["exterior_diam"]["sd"] = self.all_measures["exterior_diam"]["sd"] + random.random()*1-1
+        up=-1
+        if(random.randint(0,1)):up=1
+        self.all_measures["exterior_diam"]["mean"] = self.all_measures["exterior_diam"]["mean"] + random.random()*10*up
+        #self.all_measures["exterior_diam"]["sd"] = self.all_measures["exterior_diam"]["sd"] + random.random()*1-1
 
     def copy(self,ws2):
-        self.all_measures["exterior_diam"]["mean"] = ws2.all_measures["exterior_diam"]["mean"] + random.random()*self.all_measures["exterior_diam"]["sd"]-self.all_measures["exterior_diam"]["sd"]
-        self.all_measures["exterior_diam"]["sd"] = ws2.all_measures["exterior_diam"]["sd"] + random.random()*self.all_measures["exterior_diam"]["sd"]-self.all_measures["exterior_diam"]["sd"]
+        up=-1
+        if(random.randint(0,1)):up=1
+        self.all_measures["exterior_diam"]["mean"] = ws2.all_measures["exterior_diam"]["mean"] + random.random()*2*up
+        #self.all_measures["exterior_diam"]["sd"] = ws2.all_measures["exterior_diam"]["sd"] + random.random()*self.all_measures["exterior_diam"]["sd"]-self.all_measures["exterior_diam"]["sd"]
 
 ##Definition of the main function
 def main(argv):
@@ -82,25 +86,26 @@ def main(argv):
     world = list() #initialisation of the world
 
 
-    production = open("result.csv", "rw+")
-    header = "time,workshop,exterior_diam\n"
+    production = open("result.csv", "w")
+    header = "time,workshop,amphora,exterior_diam\n"
     production.write(header)
     
-    #forwe create the wanted number of workshop an position them at equal distance
+    #forloop to create the wanted number of workshop an position them at equal distance
     for ws in range(1,n_ws,1):
-        new_ws= Workshop('ws_'+str(ws),ws,{"exterior_diam":{"mean":160,"sd":9}},10)
+        new_ws= Workshop('ws_'+str(ws),ws,{"exterior_diam":{"mean":160+ws,"sd":9}},10)
         world.append(new_ws)
 
 ##begin of the simulation
     for t in range(0,max_time,1):  
         print "timestep:", str(t)
         for ws in world :
-            ws.writeProduction(10,t,production)
-            if( random.random()<.01):
+            if( t%1000 ==0): ws.writeProduction(100,t,production)
+            if( random.random()<.001):
                 ws.mutate()
-                for ws2 in world :
-                    if (abs(ws.dist-ws2.dist)/n_ws):
-                        ws.copy(ws2) #Horizontal transfer
+            n=random.randint(0,(n_ws-2))
+            ws2 = world[n]
+            if ((ws.dist-ws2.dist)^2/((n_ws-2)^2) < random.random() and ws.id != ws2.id and ws.dist - ws2.dist >5 ):
+                ws.copy(ws2)  
 
 
     production.close()
