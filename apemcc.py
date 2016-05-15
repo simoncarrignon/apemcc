@@ -33,7 +33,7 @@ class Workshop(object):
     #writeProduce: write in a file the an amphora produced given the parameter of the workshop 
     def writeProduction(self,amount,t,res_file):
         for i in range(1,amount,1):
-            amph=str(t)+","+self.id+",amphora_"+ str(i)
+            amph=str(t)+","+self.id+","+str(self.dist)+",amphora_"+ str(i)
             for measure in self.all_measures:
                 param=self.all_measures[measure]
                 val=random.gauss(param["mean"],param["sd"])
@@ -51,7 +51,7 @@ class Workshop(object):
     def copy(self,ws2):
         up=-1
         if(random.randint(0,1)):up=1
-        self.all_measures["exterior_diam"]["mean"] = ws2.all_measures["exterior_diam"]["mean"] + random.random()*2*up
+        self.all_measures["exterior_diam"]["mean"] = ws2.all_measures["exterior_diam"]["mean"] #+ random.random()*2*up
         #self.all_measures["exterior_diam"]["sd"] = ws2.all_measures["exterior_diam"]["sd"] + random.random()*self.all_measures["exterior_diam"]["sd"]-self.all_measures["exterior_diam"]["sd"]
 
 ##Definition of the main function
@@ -87,24 +87,32 @@ def main(argv):
 
 
     production = open("result.csv", "w")
-    header = "time,workshop,amphora,exterior_diam\n"
+    header = "time,workshop,dist,amphora,exterior_diam\n"
     production.write(header)
     
     #forloop to create the wanted number of workshop an position them at equal distance
-    for ws in range(1,n_ws,1):
-        new_ws= Workshop('ws_'+str(ws),ws,{"exterior_diam":{"mean":160+ws,"sd":9}},10)
+    for ws in range(0,n_ws,1):
+        dist=ws**3
+        #if(ws > 3):
+        #    dist=ws+3
+        #if ws > 6:
+        #    dist=ws+9
+        new_ws= Workshop('ws_'+str(ws),dist,{"exterior_diam":{"mean":160+ws,"sd":9}},10)
         world.append(new_ws)
 
 ##begin of the simulation
     for t in range(0,max_time,1):  
-        print "timestep:", str(t)
         for ws in world :
-            if( t%1000 ==0): ws.writeProduction(100,t,production)
+            if( t%1000 ==0): 
+                ws.writeProduction(100,t,production)
+                #print "timestep:", str(t)
             if( random.random()<.001):
                 ws.mutate()
-            n=random.randint(0,(n_ws-2))
+            n=random.randint(0,(n_ws-1))
             ws2 = world[n]
-            if ((ws.dist-ws2.dist)^2/((n_ws-2)^2) < random.random() and ws.id != ws2.id and ws.dist - ws2.dist >5 ):
+            #print(ws.dist,ws2.dist)
+            #print(float(abs(ws.dist-ws2.dist))/((n_ws)**3))
+            if( float(abs(ws.dist-ws2.dist))/((n_ws-1)**3) < random.random() and ws.id != ws2.id):#and ws.dist - ws2.dist <10):
                 ws.copy(ws2)  
 
 
