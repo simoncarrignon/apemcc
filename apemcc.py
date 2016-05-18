@@ -5,6 +5,7 @@
 
 import sys, getopt
 import random 
+import math
 
 #Definition of the Agent which are workshop in our case:
 
@@ -92,7 +93,7 @@ def main(argv):
     
     #forloop to create the wanted number of workshop an position them at equal distance
     for ws in range(0,n_ws,1):
-        dist=ws**3
+        dist=ws**2
         #if(ws > 3):
         #    dist=ws+3
         #if ws > 6:
@@ -110,10 +111,12 @@ def main(argv):
                 ws.mutate()
             n=random.randint(0,(n_ws-1))
             ws2 = world[n]
-            #print(ws.dist,ws2.dist)
-            #print(float(abs(ws.dist-ws2.dist))/((n_ws)**3))
-            if( float(abs(ws.dist-ws2.dist))/((n_ws-1)**3) < random.random() and ws.id != ws2.id):#and ws.dist - ws2.dist <10):
-                ws.copy(ws2)  
+            if( ws.id != ws2.id and random.random() < .01):
+                if(float(math.log(abs(ws.dist-ws2.dist)))/float(math.log((n_ws-1)**2)) < random.random() and ws.dist - ws2.dist <5):
+                    #print(ws.dist,ws2.dist)
+                    u=1
+                    #print(float(abs(ws.dist-ws2.dist))/((n_ws)**3))
+                    ws.copy(ws2)  
 
 
     production.close()
