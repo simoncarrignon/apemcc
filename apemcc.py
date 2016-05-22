@@ -31,7 +31,7 @@ class Workshop(object):
         for i in range(1,amount,1):
             amphsize= random.gauss(self.all_measures["exterior_diam"]["mean"],self.all_measures["exterior_diam"]["sd"])
 
-    #writeProduce: write in a file the an amphora produced given the parameter of the workshop 
+    #writeProduce: write in a file the amphora produced given the parameter of the workshop 
     def writeProduction(self,amount,t,res_file):
         for i in range(1,amount,1):
             amph=str(t)+","+self.id+","+str(self.dist)+",amphora_"+ str(i)
@@ -61,24 +61,29 @@ def main(argv):
     #initialisation of the variable used during the simulation
     n_ws = 0   
     max_time = 0
+    outfile = "default"
 
 ###Folling lines using to parse the arguments from the command line
+    use='apemcc.py -w <number of Workshop> -t <time> -f <file>'
+
     try:
-        opts, args = getopt.getopt(argv,"hw:t:",)
+        opts, args = getopt.getopt(argv,"hw:t:f:",)
     except getopt.GetoptError:
-        print 'apemcc.py -w <number of Workshop> -t <time>'
+        print use
         sys.exit(2)
     if len(opts) < 1:
-        print 'apemcc.py -w <number of Workshop> -t <time>'
+        print use
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print 'apemcc.py -w <number of Workshop> -t <time>'
+            print use
             sys.exit()
         elif opt == "-w":
            n_ws = int(arg)
         elif opt == "-t":
            max_time = int(arg)
+        elif opt == "-f":
+           outfile = str(arg)
 #########################
 
     print str(n_ws), 'Workshop' 
@@ -87,13 +92,14 @@ def main(argv):
     world = list() #initialisation of the world
 
 
-    production = open("result.csv", "w")
+    outfilename=outfile+"_"+"N"+str(n_ws)+".csv"
+    production = open(outfilename, "w")
     header = "time,workshop,dist,amphora,exterior_diam\n"
     production.write(header)
     
     #forloop to create the wanted number of workshop an position them at equal distance
     for ws in range(0,n_ws,1):
-        dist=ws**2
+        dist=ws**3
         #if(ws > 3):
         #    dist=ws+3
         #if ws > 6:
@@ -112,11 +118,11 @@ def main(argv):
             n=random.randint(0,(n_ws-1))
             ws2 = world[n]
             if( ws.id != ws2.id and random.random() < .01):
-                if(float(math.log(abs(ws.dist-ws2.dist)))/float(math.log((n_ws-1)**2)) < random.random() and ws.dist - ws2.dist <5):
+                if(float(math.log(abs(ws.dist-ws2.dist)))/float(math.log((n_ws-1)**3)) < random.random() and ws.dist - ws2.dist <5):
                     #print(ws.dist,ws2.dist)
                     u=1
                     #print(float(abs(ws.dist-ws2.dist))/((n_ws)**3))
-                    ws.copy(ws2)  
+                  #  ws.copy(ws2)  
 
 
     production.close()
