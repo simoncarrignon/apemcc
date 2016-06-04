@@ -96,15 +96,16 @@ def main(argv):
     production = open(outfilename, "w")
     header = "time,workshop,dist,amphora,exterior_diam\n"
     production.write(header)
+    pn=50
     
     #forloop to create the wanted number of workshop an position them at equal distance
     for ws in range(0,n_ws,1):
-        dist=ws**3
+        dist=ws
         #if(ws > 3):
         #    dist=ws+3
         #if ws > 6:
         #    dist=ws+9
-        new_ws= Workshop('ws_'+str(ws),dist,{"exterior_diam":{"mean":160+ws,"sd":9}},10)
+        new_ws= Workshop('ws_'+str(ws),dist,{"exterior_diam":{"mean":167.7+ws,"sd":12.26}},10)
         world.append(new_ws)
 
 ##begin of the simulation
@@ -118,11 +119,12 @@ def main(argv):
             n=random.randint(0,(n_ws-1))
             ws2 = world[n]
             if( ws.id != ws2.id and random.random() < .01):
-                if(float(math.log(abs(ws.dist-ws2.dist)))/float(math.log((n_ws-1)**3)) < random.random() and ws.dist - ws2.dist <5):
+                #if(float(math.log(abs(ws.dist-ws2.dist)))/float(math.log((n_ws-1)**3)) < random.random() and ws.dist - ws2.dist <5):
+                if(float(math.exp(abs(ws.dist-ws2.dist)**pn))/float(math.exp((n_ws-1)**pn)) < random.random() and ws.dist - ws2.dist <5):
                     #print(ws.dist,ws2.dist)
                     u=1
                     #print(float(abs(ws.dist-ws2.dist))/((n_ws)**3))
-                  #  ws.copy(ws2)  
+                    ws.copy(ws2)  
 
 
     production.close()
