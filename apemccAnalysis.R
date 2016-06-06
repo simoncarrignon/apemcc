@@ -104,6 +104,32 @@ boxplot(t(varSim(lineNC)))
 cubeC=readFolder("cubeC/")
 vioplot2(cubeC,"workshop","exterior_diam")
 
+
+##LAST GRAPH
+juntos=c()
+juntos=rbind(
+	     varSim(getLastIt(lineNC)),
+	     varSim(getLastIt(cubeC)),
+	     varSim(getLastIt(lineC))
+	     )
+rownames(juntos)=c("","","")#expression(frac(1,d^3)),"1/d")
+pdf("interworkshopvar.pdf",pointsize=20)
+vioplot3(t(juntos),ylim=c(0,40),ylab="Interworkshops variation (cm)",xlab="P(T)",xaxt="n")
+axis(1,label=c("0",expression(1%/%d^3),expression(1%/%d)),at=1:3)
+dev.off()
+#axis(1,label=c("0",expression(frac(1,d^3)),expression(frac(1,d))),at=1:3)
+
+colnames(u)[ncol(u)]="PA"
+juntos=rbind(juntos,u)
+u=cbind(getLastIt(lineC),"lineC")
+colnames(u)[ncol(u)]="PA"
+juntos=rbind(juntos,u)
+u=cbind(getLastIt(cubeC),"cubeC")
+colnames(u)[ncol(u)]="PA"
+juntos=rbind(juntos,u)
+	     
+vioplot2(juntos,"PA","exterior_diam")
+
 cubeC10=readFolder("cubeC10/")
 vioplot2(cubeC10,"workshop","exterior_diam")
 
@@ -117,7 +143,6 @@ lineNC=readFolder("lineNC/")
 vioplot2(getLastIt(cubeNC),"workshop","exterior_diam")
 
 pn3C=readFolder("pn3/")
-vioplot2(pn3C,"workshop","exterior_diam")
 vioplot3(t(varSim(limitTimeStep(pn3C,timesel) )),ylim=c(0,30),main="Evolution of interworkshop variance",ylab="Var in Exterior Diam. Mean. Size",xlab="Time")
 
 	sd(lineNC$exterior_diam)
@@ -194,7 +219,7 @@ readFolder<-function(fname){
 }
 
 getLastIt<-function(data){
-    return(data[data$time >= max(data$time)-1000,])
+    return(data[data$time >= max(data$time),])
 }
 
 varWorkshopTime<-function(data){
