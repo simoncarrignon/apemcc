@@ -119,8 +119,8 @@ def main(argv):
             n=random.randint(0,(n_ws-1))
             ws2 = world[n]
             if( ws.id != ws2.id and random.random() < .01):
-                #if(float(math.log(abs(ws.dist-ws2.dist)))/float(math.log((n_ws-1)**3)) < random.random() and ws.dist - ws2.dist <5):
-                if(float(math.exp(abs(ws.dist-ws2.dist)**pn))/float(math.exp((n_ws-1)**pn)) < random.random()  ws.dist - ws2.dist <5):
+                if(float(math.log(abs(ws.dist-ws2.dist)))/float(math.log((n_ws-1)**3)) < random.random() and ws.dist - ws2.dist <5):
+                #if(float(math.exp(abs(ws.dist-ws2.dist)**pn))/float(math.exp((n_ws-1)**pn)) < random.random()  ws.dist - ws2.dist <5):
                     #print(ws.dist,ws2.dist)
                     u=1
                     #print(float(abs(ws.dist-ws2.dist))/((n_ws)**3))
