@@ -6,9 +6,26 @@
 import sys, getopt
 import random 
 import math
+import csv
+
+#"parlamento","belen",72.45
+#"parlamento","delicias",82.01
+#"parlamento","malpica",74.77
+#"belen","parlamento",72.45
+#"belen","delicias",22.82
+#"belen","malpica ",8.73
+#"delicias","parlamento",82.01
+#"delicias","belen",22.82
+#"delicias","malpica",14.19
+#"malpica","parlamento",74.77
+#"malpica","belen",8.73
+#"malpica","delicias",14.19
+#"villaseca","belen",25.23
+#"villaseca","malpica",20.97
+#"villaseca","delicias",22.45
+#"villaseca","parlamento",95.33
 
 #Definition of the Agent which are workshop in our case:
-
 class Workshop(object):
     dist=0
     id=""
@@ -44,16 +61,21 @@ class Workshop(object):
 
     #mutate: randomly change the parameter of production
     def mutate(self):
-        up=-1
-        if(random.randint(0,1)):up=1
-        self.all_measures["exterior_diam"]["mean"] = self.all_measures["exterior_diam"]["mean"] + random.random()*10*up
-        #self.all_measures["exterior_diam"]["sd"] = self.all_measures["exterior_diam"]["sd"] + random.random()*1-1
+        for measure in self.all_measures:
+            up=-1 #increase or decrease the value
+            if(random.randint(0,1)):up=1
+            self.all_measures[measure]["mean"] = self.all_measures[measure]["mean"] + random.random()*10*up
 
     def copy(self,ws2):
-        up=-1
-        if(random.randint(0,1)):up=1
-        self.all_measures["exterior_diam"]["mean"] = ws2.all_measures["exterior_diam"]["mean"] #+ random.random()*2*up
-        #self.all_measures["exterior_diam"]["sd"] = ws2.all_measures["exterior_diam"]["sd"] + random.random()*self.all_measures["exterior_diam"]["sd"]-self.all_measures["exterior_diam"]["sd"]
+        for measure in self.all_measures:
+            up=-1
+            if(random.randint(0,1)):up=1
+            self.all_measures[measure]["mean"] = ws2.all_measures[measure]["mean"] #+ random.random()*2*up
+            #self.all_measures["exterior_diam"]["sd"] = ws2.all_measures["exterior_diam"]["sd"] + random.random()*self.all_measures["exterior_diam"]["sd"]-self.all_measures["exterior_diam"]["sd"]
+
+    #def dist(self,ws2):
+    #    return(mat_dist[self.id,ws2.id])
+    ##self.all_measures["exterior_diam"]["sd"] = ws2.all_measures["exterior_diam"]["sd"] + random.random()*self.all_measures["exterior_diam"]["sd"]-self.all_measures["exterior_diam"]["sd"]
 
 ##Definition of the main function
 def main(argv):
@@ -90,22 +112,37 @@ def main(argv):
     print 'During ', str(max_time), 'iterations' 
 
     world = list() #initialisation of the world
+    world_dist=dict()
+    with open('data/distmetrics.csv','rb') as distfile:
+          distances = csv.reader(distfile, delimiter=',')
+          for row in distances:
+              print(row[0])
+              world_dist[row[0]+row[1]]=float(row[2]) #print(row)
+              world_dist[row[1]+row[0]]=float(row[2]) #print(row)
+          #worldlist[distances[1]] = {distances[2],distances[3]}
 
 
+    print(world_dist)
     outfilename=outfile+"_"+"N"+str(n_ws)+".csv"
     production = open(outfilename, "w")
-    header = "time,workshop,dist,amphora,exterior_diam\n"
+    header = "time,workshop,dist,amphora,exterior_diam,protruding_rim\n"
     production.write(header)
-    pn=50
+    pn=5
     
     #forloop to create the wanted number of workshop an position them at equal distance
-    for ws in range(0,n_ws,1):
-        dist=ws
-        #if(ws > 3):
-        #    dist=ws+3
-        #if ws > 6:
-        #    dist=ws+9
-        new_ws= Workshop('ws_'+str(ws),dist,{"exterior_diam":{"mean":167.7+ws,"sd":12.26}},10)
+    #for ws in range(0,n_ws,1):
+    #    dist=ws
+    #    #if(ws > 3):
+    #    #    dist=ws+3
+    #    #if ws > 6:
+    #    #    dist=ws+9
+    #    new_ws= Workshop('ws_'+str(ws),dist,{"exterior_diam":{"mean":167.7+ws,"sd":12.26},"protruding_rim":{"mean":19+ws,"sd":5.6}},10)
+    #    world.append(new_ws)
+
+
+    for ws in  {"villaseca","belen","malpica","delicias","parlamento"}:
+        dist=10
+        new_ws= Workshop(ws,dist,{"exterior_diam":{"mean":167.7,"sd":12.26},"protruding_rim":{"mean":19,"sd":5.6}},10)
         world.append(new_ws)
 
 ##begin of the simulation
@@ -119,11 +156,16 @@ def main(argv):
             n=random.randint(0,(n_ws-1))
             ws2 = world[n]
             if( ws.id != ws2.id and random.random() < .01):
+                rel_dist=world_dist[ws2.id+ws.id]
+                #print(rel_dist, ws2.id, ws.id)
+                #if( (float(rel_dist**3)-(8.13**3))/((95.33**3)-(8.13**3)) < random.random() ):
+                r=random.random()
+                if( (float(rel_dist)-(8.13))/((95.33)-(8.13)) < 2 ):
                 #if(float(math.log(abs(ws.dist-ws2.dist)))/float(math.log((n_ws-1)**3)) < random.random() and ws.dist - ws2.dist <5):
-                if(float(math.exp(abs(ws.dist-ws2.dist)**pn))/float(math.exp((n_ws-1)**pn)) < random.random()  ws.dist - ws2.dist <5):
-                    #print(ws.dist,ws2.dist)
+                #if(float(math.exp(abs(ws.dist-ws2.dist)**pn))/float(math.exp((n_ws-1)**pn)) < random.random() and ws.dist - ws2.dist <5):
+                    #print(ws.id,ws2.id)
                     u=1
-                    #print(float(abs(ws.dist-ws2.dist))/((n_ws)**3))
+                    #print("copy:",(float(rel_dist)-(8.13))/((95.33)-(8.13)),"r:",r) 
                     ws.copy(ws2)  
 
 

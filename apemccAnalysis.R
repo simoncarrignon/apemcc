@@ -38,7 +38,8 @@ plot
 
 analyseRealData<-function(){
 
-emp=read.csv("data/dres.csv")
+emp=read.csv("data/drespaper.csv")
+emp=emp[ emp$type != "Dressel 23",]
 	boxplot(emp$protruding_rim ~ emp$site)
 	cov(emp$rim_h,emp$rim_w)
 	cor(emp$rim_h,emp$rim_w)
@@ -50,12 +51,15 @@ emp=read.csv("data/dres.csv")
 	       lm(emp$exterior_diam~emp$rim_w)
 	       )
 	mean(tapply(emp$exterior_diam,emp$site,mean))
-	tapply(emp$exterior_diam,emp$site,length)
+	tapply(emp$exterior_diam,emp$site,mean)
 	sd(emp$exterior_diam)
 	sd(tapply(cubeC$exterior_diam,cubeC$workshop,mean))
 	sd(cubeC$exterior_diam)
 	mean(tapply(model$exterior_diam,model$workshop,sd))
 	sd(model$exterior_diam)
+
+	apply(emp[,5:12],2,sd)/	apply(emp[,5:12],2,mean)
+	summary=rbind(apply(emp[,5:12],2,sd),	apply(emp[,5:12],2,mean))
 
 vioplot2(emp,"site","protruding_rim")
 vioplot2(cubeC,"workshop","exterior_diam")
@@ -67,8 +71,12 @@ dev.off()
 defN4=read.csv("default_N4.csv")
 vioplot2(defN4,"workshop","exterior_diam")
 
-defN4=read.csv("lineC/lineC_100_N4.csv")
-vioplot2(getLastIt(defN4),"workshop","exterior_diam")
+defN5=read.csv("testE_N5.csv")
+vioplot2(defN5,"workshop","protruding_rim")
+
+defN5=read.csv("lineC/lineC_100_N5.csv")
+defN5=defN5[defN5$time == max(defN5$time),]
+vioplot2(getLastIt(defN5),"workshop","exterior_diam")
 	sd(tapply(emp$exterior_diam,emp$site,mean))
 
 tsd=c()
@@ -135,6 +143,70 @@ vioplot2(cubeC10,"workshop","exterior_diam")
 
 cubeNC=readFolder("cubeNC/")
 vioplot2(cubeNC,"workshop","exterior_diam")
+
+YSLR_man   <-  function(){
+verti=readFolder("verti/")
+hori=readFolder("hori/")
+horicube=readFolder("horiCub/")
+horiM=readFolder("horiM/")
+horiH=readFolder("horiH/")
+horimas=readFolder("horimas/")
+
+j=rbind(
+	     varSim(getLastIt(verti),vari="protruding_rim"),
+	     varSim(getLastIt(hori),vari="protruding_rim"),
+	     varSim(getLastIt(horiH),vari="protruding_rim")
+	     )
+rownames(j)=c("VT","VT+HT(d)","VT+HT")
+plotDensities(t(j),colnames(t(j)))
+
+juntosPR=rbind(
+	     varSim(getLastIt(verti),vari="protruding_rim"),
+	     varSim(getLastIt(hori),vari="protruding_rim"),
+	     varSim(getLastIt(horiH),vari="protruding_rim")
+	     #varSim(getLastIt(horimas))
+	     )
+rownames(juntosPR)=c("VT","VT+HT(d)","VT+HT")
+pdf("../../doc/YSLR_Manchester/images/PR_densities.pdf",pointsize=17)
+plotDensities(t(juntosPR),colnames(t(juntosPR)))
+abline(v=sd(tapply(emp$protruding_rim,emp$site,mean)),col="red",lwd=3)
+text(sd(tapply(emp$protruding_rim,emp$site,mean))+0.8,.23,"dataset variation of means",srt=90,col="red",cex=.7)
+dev.off()
+
+juntos=rbind(
+	     varSim(getLastIt(verti),vari="exterior_diam"),
+	     varSim(getLastIt(hori),vari="exterior_diam"),
+	     varSim(getLastIt(horiH),vari="exterior_diam")
+	     )
+rownames(juntos)=c("VT","VT+HT(d)","VT+HT")
+pdf("../../doc/YSLR_Manchester/images/ED_densities.pdf",pointsize=17)
+plotDensities(t(juntos),colnames(t(juntos)))
+abline(v=sd(tapply(emp$exterior_diam,emp$site,mean)),col="red",lwd=3)
+text(sd(tapply(emp$exterior_diam,emp$site,mean))+0.8,.25,"dataset variation of means",srt=90,col="red",cex=.7)
+dev.off()
+
+pdf("../../doc/YSLR_Manchester/images/PR_densities.pdf",pointsize=17)
+vioplot3(t(juntosPR),ylim=c(0,,max(juntosPR)),ylab="Interworkshops variation (cm)",xlab="P(T)",xaxt="n")
+abline(h=sd(tapply(emp$protruding_rim,emp$site,mean)),col="red",lwd=3)
+text(sd(tapply(emp$protruding_rim,emp$site,mean))+0.8,.23,"dataset variation of means",srt=90,col="red",cex=.7)
+dev.off()
+
+juntos=rbind(
+	     varSim(getLastIt(verti),vari="exterior_diam"),
+	     varSim(getLastIt(hori),vari="exterior_diam"),
+	     varSim(getLastIt(horiH),vari="exterior_diam")
+	     )
+rownames(juntos)=c("VT","VT+HT(d)","VT+HT")
+pdf("../../doc/YSLR_Manchester/images/ED_densities.pdf",pointsize=17)
+vioplot3(t(juntos),ylim=c(0,max(juntos)),ylab="Interworkshops variation (cm)",xlab="",xaxt="n")
+abline(h=sd(tapply(emp$exterior_diam,emp$site,mean)),col="red",lwd=3)
+text(sd(tapply(emp$exterior_diam,emp$site,mean))+0.8,.25,"dataset variation of means",srt=90,col="red",cex=.7)
+dev.off()
+}
+
+vioplot2(getLastIt(verti),"workshop","exterior_diam")
+
+
 
 lineC=readFolder("lineC/")
 vioplot2(lineC,"workshop","exterior_diam")
@@ -222,21 +294,41 @@ getLastIt<-function(data){
     return(data[data$time >= max(data$time),])
 }
 
-varWorkshopTime<-function(data){
+varWorkshopTime<-function(data,vari="exterior_diam"){
     sapply(unique(data$time),function(i){
-		     r=sd(tapply(data$exterior_diam[data$time==i],data$workshop[data$time==i],mean))
+		     r=sd(tapply(data[data$time==i,vari],data$workshop[data$time==i],mean))
 		     names(r)=i
 		     return(r)
     })
 }
 
-varSim<-function(data){
+varSim<-function(data,vari="exterior_diam"){
 	sapply(unique(data$id),function(i){
 	       tmp=data[data$id == i,]
-	       varWorkshopTime(tmp)
+	       varWorkshopTime(tmp,vari=vari)
     })
 }
 
 limitTimeStep<-function(data,timelist){
 return(data[data$time %in% timelist ,])
 }
+
+plotDensities <- function(datas,epsilon,...){
+    htcol=heat.colors(length(epsilon),alpha=1)
+    names(htcol)=epsilon
+    htcolF=heat.colors(length(epsilon),alpha=.5)
+    names(htcolF)=epsilon
+    densities=lapply(colnames(datas) ,function(i){density(datas[,i])})
+    names(densities)=colnames(datas)
+    rangex=range(lapply(densities,function(i)range(i$x)))
+    rangey=range(lapply(densities,function(i)range(i$y)))
+    par(mar=c(5,5,1,1))
+    plot(density(datas),xlim=rangex,ylim=rangey,type="n",xlab="Variation of the mean size per workshop",main="",...)
+    lapply(seq_along(densities),function(i){
+	   polygon(densities[[i]],col=htcolF[names(densities)[i]],lwd=2)#,density=20,angle=45*i,border=htcol[names(densities)[i]])
+#	   abline(v=mean(densities[[i]]$x),col=htcol[names(densities)[i]])
+#	   text(mean(densities[[i]]$x),0,names(densities)[i],col=htcol[names(densities)[i]])
+	})
+    legend("topright",legend=epsilon,fill=htcolF,title="model")
+}
+
