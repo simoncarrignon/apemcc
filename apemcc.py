@@ -8,6 +8,7 @@ import random
 import math
 import csv
 
+#distances between workshops created by google maps
 #"parlamento","belen",72.45
 #"parlamento","delicias",82.01
 #"parlamento","malpica",74.77
@@ -39,14 +40,14 @@ class Workshop(object):
         self.dist=dist
         print('New workshop called '+self.id+" at : "+str(self.dist)+" km")
 
-    #fonction to use  str() in order to print a workshop as a string
-    def __str__(self):
-        return('Workshop '+self.id+" at distance: "+str(self.dist)+"\n\t they produce amphora with exterior_diam mean="+str(self.all_measures["exterior_diam"]["mean"])+", sd="+str(self.all_measures["exterior_diam"]["sd"]))
+    #fonction to use  str() in order to print a workshop as a string (in this case doesnt work with this code)
+    #def __str__(self):
+        #return('Workshop '+self.id+" at distance: "+str(self.dist)+"\n\t they produce amphora with exterior_diam mean="+str(self.all_measures["exterior_diam"]["mean"])+", sd="+str(self.all_measures["exterior_diam"]["sd"]))
     
-    #produce: show a production of amphora given the parameter of the function measure we use
-    def produce(self,amount):
-        for i in range(1,amount,1):
-            amphsize= random.gauss(self.all_measures["exterior_diam"]["mean"],self.all_measures["exterior_diam"]["sd"])
+    #produce: show a production of amphora given the parameter of the function measure we use (in this case doesnt work with this code)
+    #def produce(self,amount):
+        #for i in range(1,amount,1):
+            #amphsize= random.gauss(self.all_measures["exterior_diam"]["mean"],self.all_measures["exterior_diam"]["sd"])
 
     #writeProduce: write in a file the amphora produced given the parameter of the workshop 
     def writeProduction(self,amount,t,res_file):
@@ -125,7 +126,7 @@ def main(argv):
     print(world_dist)
     outfilename=outfile+"_"+"N"+str(n_ws)+".csv"
     production = open(outfilename, "w")
-    header = "time,workshop,dist,amphora,exterior_diam,protruding_rim\n"
+    header = "time,workshop,dist,amphora,exterior_diam,protruding_rim,rim_w,rim_w_2\n"
     production.write(header)
     pn=5
     
@@ -142,7 +143,7 @@ def main(argv):
 
     for ws in  {"villaseca","belen","malpica","delicias","parlamento"}:
         dist=10
-        new_ws= Workshop(ws,dist,{"exterior_diam":{"mean":167.7,"sd":12.26},"protruding_rim":{"mean":19,"sd":5.6}},10)
+        new_ws= Workshop(ws,dist,{"exterior_diam":{"mean":167.7,"sd":12.26},"protruding_rim":{"mean":19,"sd":5.6}, "rim_w":{"mean":36.29,"sd": 4.76}, "rim_w_2":{"mean": 30.35,"sd": 5.38}},10)
         world.append(new_ws)
 
 ##begin of the simulation
