@@ -211,7 +211,7 @@ YSLR_man   <-  function(){
 
     ###This are the old version of the graph (as used in edinburgh), with the vioplot in black and white
     pdf("images/PR_densities_vioplot.pdf",pointsize=17)
-    vioplot3(t(all_protrim),ylim=c(0,,max(all_protrim)),ylab="Interworkshops variation (cm)",xlab="P(T)",xaxt="n")
+    vioplot3(t(all_protrim),ylim=c(0,max(all_protrim)),ylab="Interworkshops variation (cm)",xlab="P(T)",xaxt="n")
     abline(h=sd(tapply(emp$protruding_rim,emp$site,mean)),col="red",lwd=3)
     text(sd(tapply(emp$protruding_rim,emp$site,mean))+0.8,.23,"dataset variation of means",srt=90,col="red",cex=.7)
     dev.off()
