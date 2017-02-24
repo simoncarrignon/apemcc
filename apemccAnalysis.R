@@ -5,40 +5,31 @@ if(require("vioplot")){library(vioplot)}
 if(require("vegan")){library(vegan)}
 
 
-##Some command use to analyse the output of the model used with theoretical distances
-analyseModelNotReal<-function(){
+##Some command use to analyse the output of the model used with theoretical distances and some examples
+#analyseModel<-function(){} if you want to create a function use this line. Remember close with {}
 
-    model=read.csv("result.csv") ;  
-    model=model[!is.na(model)]
-    model=model[model$time >= max(model$time)-1000,]; 
-    cubeCC=cubeC[cubeC$time >= max(cubeC$time)-1000,]; 
-    model=model[order(model$dist),];
+    model=read.csv("result.csv")  
+    #model=model[!is.na(model)]
+    model=model[model$time >= max(model$time)-1000,]
+    lastItmodel=getLastIt(model)
+    #cubeCC=cubeC[cubeC$time >= max(cubeC$time)-1000,]; 
+    #model=model[order(model$dist),];
+   
+   
+#version ggplot2 boxplot
+png("test_1.png")
+ggplot(model, aes(factor(workshop),exterior_diam)) + geom_boxplot(fill = "slategray3", colour = "slategray")
+dev.off()
 
+#violin version
+ggplot(model, aes(factor(workshop),exterior_diam)) + geom_violin(fill = "slategray3", colour = "slategray")
 
-
-    png("CYDS.png")
-    boxplot(model$exterior_diam ~ model$dist,ylab="exterior_rim",xlab="workshop",xaxt="n")
-    axis(1,labels=levels(model$workshop),at=1:length(unique(model$dist)))
-    dev.off()
-
-    png("CNDS.png")
-    boxplot(model$exterior_diam ~ model$dist,ylab="exterior_rim",xlab="workshop",xaxt="n")
-    axis(1,labels=levels(model$workshop),at=1:length(unique(model$dist)))
-    dev.off()
-
-    png("CYDL.png")
-    boxplot(model$exterior_diam ~ model$dist,ylab="exterior_rim",xlab="workshop",xaxt="n")
-
-    axis(1,labels=levels(model$workshop),at=1:length(unique(model$dist)))
-    dev.off()
-
-    png("CNDL.png")
-    boxplot(model$exterior_diam ~ model$dist,ylab="exterior_rim",xlab="workshop",xaxt="n")
-    axis(1,labels=levels(model$workshop),at=1:length(unique(model$dist)))
-    dev.off()
-
-
-}
+#normal version to test the exterior_diam
+png("CYDS.png")
+boxplot(model$exterior_diam ~ model$dist,ylab="exterior_rim",xlab="workshop",xaxt="n")
+axis(1,labels=levels(model$workshop),at=1:length(unique(model$dist)))
+dev.off()
+    
 
 ##Below a collection of commands used to explore the real data
 ## Exemple: to extract the mean of different measurement etc...
@@ -153,77 +144,29 @@ analyseRealData<-function(){
     cubeNC=readFolder("cubeNC/")
     vioplot2(cubeNC,"workshop","exterior_diam")
 
-YSLR_man   <-  function(){
-verti=readFolder("verti/")
-hori=readFolder("hori/")
-horicube=readFolder("horiCub/")
-horiM=readFolder("horiM/")
-horiH=readFolder("horiH/")
-horimas=readFolder("horimas/")
-
-j=rbind(
-	     varSim(getLastIt(verti),vari="protruding_rim"),
-	     varSim(getLastIt(hori),vari="protruding_rim"),
-	     varSim(getLastIt(horiH),vari="protruding_rim")
-	     )
-rownames(j)=c("VT","VT+HT(d)","VT+HT")
-plotDensities(t(j),colnames(t(j)))
-
-juntosPR=rbind(
-	     varSim(getLastIt(verti),vari="protruding_rim"),
-	     varSim(getLastIt(hori),vari="protruding_rim"),
-	     varSim(getLastIt(horiH),vari="protruding_rim")
-	     #varSim(getLastIt(horimas))
-	     )
-rownames(juntosPR)=c("VT","VT+HT(d)","VT+HT")
-pdf("PR_densities.pdf",pointsize=17)
-plotDensities(t(juntosPR),colnames(t(juntosPR)))
-abline(v=sd(tapply(emp$protruding_rim,emp$site,mean)),col="red",lwd=3)
-text(sd(tapply(emp$protruding_rim,emp$site,mean))+0.8,.23,"dataset variation of means",srt=90,col="red",cex=.7)
-dev.off()
-
-juntos=rbind(
-	     varSim(getLastIt(verti),vari="exterior_diam"),
-	     varSim(getLastIt(hori),vari="exterior_diam"),
-	     varSim(getLastIt(horiH),vari="exterior_diam")
-	     )
-rownames(juntos)=c("VT","VT+HT(d)","VT+HT")
-pdf("../../doc/YSLR_Manchester/images/ED_densities.pdf",pointsize=17)
-plotDensities(t(juntos),colnames(t(juntos)))
-abline(v=sd(tapply(emp$exterior_diam,emp$site,mean)),col="red",lwd=3)
-text(sd(tapply(emp$exterior_diam,emp$site,mean))+0.8,.25,"dataset variation of means",srt=90,col="red",cex=.7)
-dev.off()
-
-pdf("PR_densities.pdf",pointsize=17)
-vioplot3(t(juntosPR),ylim=c(0,,max(juntosPR)),ylab="Interworkshops variation (cm)",xlab="P(T)",xaxt="n")
-abline(h=sd(tapply(emp$protruding_rim,emp$site,mean)),col="red",lwd=3)
-text(sd(tapply(emp$protruding_rim,emp$site,mean))+0.8,.23,"dataset variation of means",srt=90,col="red",cex=.7)
-dev.off()
-
-juntos=rbind(
-	     varSim(getLastIt(verti),vari="exterior_diam"),
-	     varSim(getLastIt(hori),vari="exterior_diam"),
-	     varSim(getLastIt(horiH),vari="exterior_diam")
-	     )
-rownames(juntos)=c("VT","VT+HT(d)","VT+HT")
-pdf("images/ED_densities.pdf",pointsize=17)
-vioplot3(t(juntos),ylim=c(0,max(juntos)),ylab="Interworkshops variation (cm)",xlab="",xaxt="n")
-abline(h=sd(tapply(emp$exterior_diam,emp$site,mean)),col="red",lwd=3)
-text(sd(tapply(emp$exterior_diam,emp$site,mean))+0.8,.25,"dataset variation of means",srt=90,col="red",cex=.7)
-dev.off()
 }
+
+
+#########CODE EXAMPLE##################
+
 
 YSLR_man   <-  function(){
 
     ##this allow to compact the result of the 100 simulation in one table
     ###!!warnings: you needs the folders
-    verti=readFolder("verti/")
-    hori=readFolder("hori/")
-    horicube=readFolder("horiCub/")
-    horiM=readFolder("horiM/")
-    horiH=readFolder("horiH/")
-    horimas=readFolder("horimas/")
-    ####
+    #verti=readFolder("verti/")
+    #hori=readFolder("hori/")
+    #horiH=readFolder("horiH/")
+    #horicube=readFolder("horiCub/")
+    #horiM=readFolder("horiM/")
+    #horiH=readFolder("horiH/")
+    #horimas=readFolder("horimas/")
+    
+    verti=readFolder("VT/")
+    horiH=readFolder("HT/")
+    hori=readFolder("HTD/")
+    
+    ###
 
     ##a simple test:
     j=rbind(
@@ -235,7 +178,9 @@ YSLR_man   <-  function(){
     rownames(j)=c("VT","VT+HT(d)","VT+HT") #this allows to change the names of the models
 
     plotDensities(t(j),colnames(t(j))) #this plot the result of the previous command as 
-    ###
+    #######TESTING WITH MEASUREMENTS#########
+    
+    #protruding_rim
 
     all_protrim=rbind(
 		   varSim(getLastIt(verti),vari="protruding_rim"),
@@ -251,6 +196,8 @@ YSLR_man   <-  function(){
     abline(v=sd(tapply(emp$protruding_rim,emp$site,mean)),col="red",lwd=3) 
     text(sd(tapply(emp$protruding_rim,emp$site,mean))+0.8,.23,"dataset variation of means",srt=90,col="red",cex=.7)
     dev.off()
+    
+    #exterior_diam
 
     all_extdiam=rbind(
 		 varSim(getLastIt(verti),vari="exterior_diam"), #get last it allow to get the result of the last iteration and var sim allow to compute the variation of the mean between all diamter
@@ -265,6 +212,41 @@ YSLR_man   <-  function(){
     abline(v=sd(tapply(emp$exterior_diam,emp$site,mean)),col="red",lwd=3)
     text(sd(tapply(emp$exterior_diam,emp$site,mean))+0.8,.25,"dataset variation of means",srt=90,col="red",cex=.7)
     dev.off()
+    
+    #rim_w
+    
+    all_rim_w=rbind(
+		 varSim(getLastIt(verti),vari="rim_w"), #get last it allow to get the result of the last iteration and var sim allow to compute the variation of the mean between all diamter
+		 varSim(getLastIt(hori),vari="rim_w"),
+		 varSim(getLastIt(horiH),vari="rim_w")
+		 )
+    rownames(all_rim_w)=c("VT","VT+HT(d)","VT+HT")
+    #all_extdiam contains the same that all_protrim but for the variation of rim_w 
+
+    pdf("images/ED_densities.pdf",pointsize=17)
+    plotDensities(t(all_rim_w),colnames(t(all_rim_w)))
+    abline(v=sd(tapply(emp$rim_w,emp$site,mean)),col="red",lwd=3)
+    text(sd(tapply(emp$rim_w,emp$site,mean))+0.8,.25,"dataset variation of means",srt=90,col="red",cex=.7)
+    dev.off()
+    
+    #rim_w_2
+    
+    all_rim_w_2=rbind(
+		 varSim(getLastIt(verti),vari="rim_w_2"), #get last it allow to get the result of the last iteration and var sim allow to compute the variation of the mean between all diamter
+		 varSim(getLastIt(hori),vari="rim_w_2"),
+		 varSim(getLastIt(horiH),vari="rim_w_2")
+		 )
+    rownames(all_rim_w)=c("VT","VT+HT(d)","VT+HT")
+    #all_extdiam contains the same that all_protrim but for the variation of rim_w 
+
+    pdf("images/ED_densities.pdf",pointsize=17)
+    plotDensities(t(all_rim_w_2),colnames(t(all_rim_w_2)))
+    abline(v=sd(tapply(emp$rim_w_2,emp$site,mean)),col="red",lwd=3)
+    text(sd(tapply(emp$rim_w_2,emp$site,mean))+0.8,.25,"dataset variation of means",srt=90,col="red",cex=.7)
+    dev.off()
+    
+    
+  
 
     ###This are the old version of the graph (as used in edinburgh), with the vioplot in black and white
     pdf("images/PR_densities_vioplot.pdf",pointsize=17)
@@ -283,8 +265,6 @@ YSLR_man   <-  function(){
 
     ###Draft trandom test
     vioplot2(getLastIt(verti),"workshop","exterior_diam")
-
-
 
     lineC=readFolder("lineC/")
     vioplot2(lineC,"workshop","exterior_diam")
