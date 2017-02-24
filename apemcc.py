@@ -50,7 +50,11 @@ class Workshop(object):
             #amphsize= random.gauss(self.all_measures["exterior_diam"]["mean"],self.all_measures["exterior_diam"]["sd"])
 
     #writeProduce: write in a file the amphora produced given the parameter of the workshop 
-    def writeProduction(self,amount,t,res_file):
+    #if amount>0 it will limit the number of amphora written in the output file (
+    def writeProduction(self,t,res_file,amount=0):
+        if amount == 0:
+            amount=self.prod_rate
+
         for i in range(1,amount,1):
             amph=str(t)+","+self.id+","+str(self.dist)+",amphora_"+ str(i)
             for measure in self.all_measures:
@@ -64,7 +68,7 @@ class Workshop(object):
     def mutate(self):
         for measure in self.all_measures:
             up=-1 #increase or decrease the value
-            if(random.randint(0,1)):up=1
+            if(random.randint(0,1)):up=1 #randomly  increase or decrease the size
             self.all_measures[measure]["mean"] = self.all_measures[measure]["mean"] + random.random()*10*up
 
     def copy(self,ws2):
@@ -77,6 +81,10 @@ class Workshop(object):
     #def dist(self,ws2):
     #    return(mat_dist[self.id,ws2.id])
     ##self.all_measures["exterior_diam"]["sd"] = ws2.all_measures["exterior_diam"]["sd"] + random.random()*self.all_measures["exterior_diam"]["sd"]-self.all_measures["exterior_diam"]["sd"]
+#########################
+#########################
+#########################
+#########################
 
 ##Definition of the main function
 def main(argv):
@@ -87,10 +95,10 @@ def main(argv):
     outfile = "default"
 
 ###Folling lines using to parse the arguments from the command line
-    use='apemcc.py -w <number of Workshop> -t <time> -f <file>'
+    use='apemcc.py -w <number of Workshop> -t <time> -f <file> -m <model>\n model should be in {"HT","HTD","VT"}'
 
     try:
-        opts, args = getopt.getopt(argv,"hw:t:f:",)
+        opts, args = getopt.getopt(argv,"hw:t:f:m:",)
     except getopt.GetoptError:
         print use
         sys.exit(2)
@@ -107,30 +115,34 @@ def main(argv):
            max_time = int(arg)
         elif opt == "-f":
            outfile = str(arg)
+        elif opt == "-m":
+           model = str(arg)
 #########################
+##TODO: allow to easily switch from workshop in a file vs workshop created onthefly
 
     print str(n_ws), 'Workshop' 
     print 'During ', str(max_time), 'iterations' 
 
     world = list() #initialisation of the world
-    world_dist=dict()
+    world_dist=dict() #dictionnaire to store the distance of the cities two by two
+
     with open('data/distmetrics.csv','rb') as distfile:
           distances = csv.reader(distfile, delimiter=',')
           for row in distances:
-              print(row[0])
               world_dist[row[0]+row[1]]=float(row[2]) #print(row)
               world_dist[row[1]+row[0]]=float(row[2]) #print(row)
           #worldlist[distances[1]] = {distances[2],distances[3]}
 
 
-    print(world_dist)
     outfilename=outfile+"_"+"N"+str(n_ws)+".csv"
-    production = open(outfilename, "w")
+    prodfile = open(outfilename, "w")
     header = "time,workshop,dist,amphora,exterior_diam,protruding_rim,rim_w,rim_w_2\n"
-    production.write(header)
+    prodfile.write(header)
     pn=5
     
     #forloop to create the wanted number of workshop an position them at equal distance
+    #Should be used only in the theoretical case (as presented in Birmingham 2016)
+
     #for ws in range(0,n_ws,1):
     #    dist=ws
     #    #if(ws > 3):
@@ -142,35 +154,38 @@ def main(argv):
 
 
     for ws in  {"villaseca","belen","malpica","delicias","parlamento"}:
-        dist=10
-        new_ws= Workshop(ws,dist,{"exterior_diam":{"mean":167.7,"sd":12.26},"protruding_rim":{"mean":19,"sd":5.6}, "rim_w":{"mean":36.29,"sd": 4.76}, "rim_w_2":{"mean": 30.35,"sd": 5.38}},10)
+        dist=10 #this is not use in that case as the "distance" are given by the dictionnary world_dict
+        new_ws= Workshop(ws,dist,{"exterior_diam":{"mean":167.7,"sd":12.26},"protruding_rim":{"mean":19,"sd":5.6}, "rim_w":{"mean":36.29,"sd": 4.76}, "rim_w_2":{"mean": 30.35,"sd": 5.38}},100)
         world.append(new_ws)
 
 ##begin of the simulation
+    print "starting the simulation with copy mechanism:",model
     for t in range(0,max_time,1):  
         for ws in world :
             if( t%1000 ==0): 
-                ws.writeProduction(100,t,production)
+                ws.writeProduction(t,prodfile)
                 #print "timestep:", str(t)
             if( random.random()<.001):
                 ws.mutate()
             n=random.randint(0,(n_ws-1))
             ws2 = world[n]
-            if( ws.id != ws2.id and random.random() < .01):
-                rel_dist=world_dist[ws2.id+ws.id]
-                #print(rel_dist, ws2.id, ws.id)
-                #if( (float(rel_dist**3)-(8.13**3))/((95.33**3)-(8.13**3)) < random.random() ):
+            if( ws.id != ws2.id and random.random() < .01):  #with a 1/100 proba we initialize a copy
+                rel_dist=world_dist[ws2.id+ws.id] #get the distance between two given workshop
                 r=random.random()
-                if( (float(rel_dist)-(8.13))/((95.33)-(8.13)) < 2 ):
-                #if(float(math.log(abs(ws.dist-ws2.dist)))/float(math.log((n_ws-1)**3)) < random.random() and ws.dist - ws2.dist <5):
-                #if(float(math.exp(abs(ws.dist-ws2.dist)**pn))/float(math.exp((n_ws-1)**pn)) < random.random() and ws.dist - ws2.dist <5):
-                    #print(ws.id,ws2.id)
-                    u=1
-                    #print("copy:",(float(rel_dist)-(8.13))/((95.33)-(8.13)),"r:",r) 
+                if(  model == "HT"):
+                    proba= 1   #no effect of distance between the workshop ie everybody copy everybody with same proba of 1/100
+                elif model== "HTD":
+                    proba=(float(rel_dist)-(8.13))/((95.33)-(8.13)) < random.random() #should be true when two workshop are close to eachother
+                elif model == "VT": 
+                    proba= 0
+                print proba
+
+                if proba:
                     ws.copy(ws2)  
 
+    prodfile.close()
+    print "simulation done."
 
-    production.close()
 
 
 
