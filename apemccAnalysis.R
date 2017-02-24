@@ -162,11 +162,16 @@ YSLR_man   <-  function(){
     ###!!warnings: you needs the folders
     verti=readFolder("verti/")
     hori=readFolder("hori/")
+    horiH=readFolder("horiH/")
     horicube=readFolder("horiCub/")
     horiM=readFolder("horiM/")
     horiH=readFolder("horiH/")
     horimas=readFolder("horimas/")
     ####
+
+    verti=readFolder("VT/")
+    horiH=readFolder("HT/")
+    hori=readFolder("HTD/")
 
     ##a simple test:
     j=rbind(
