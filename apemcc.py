@@ -178,7 +178,6 @@ def main(argv):
                     proba=(float(rel_dist)-(8.13))/((95.33)-(8.13)) < random.random() #should be true when two workshop are close to eachother
                 elif model == "VT": 
                     proba= 0
-                print proba
 
                 if proba:
                     ws.copy(ws2)  
