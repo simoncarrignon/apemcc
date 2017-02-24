@@ -4,7 +4,6 @@
 if(require("vioplot")){library(vioplot)}
 if(require("vegan")){library(vegan)}
 
-emp <- getRealMeasurment() #load the mesuremant from data/drespaper.csv and remove Dressel 23
 
 ##Some command use to analyse the output of the model used with theoretical distances
 analyseModelNotReal<-function(){
@@ -154,6 +153,64 @@ analyseRealData<-function(){
     cubeNC=readFolder("cubeNC/")
     vioplot2(cubeNC,"workshop","exterior_diam")
 
+YSLR_man   <-  function(){
+verti=readFolder("verti/")
+hori=readFolder("hori/")
+horicube=readFolder("horiCub/")
+horiM=readFolder("horiM/")
+horiH=readFolder("horiH/")
+horimas=readFolder("horimas/")
+
+j=rbind(
+	     varSim(getLastIt(verti),vari="protruding_rim"),
+	     varSim(getLastIt(hori),vari="protruding_rim"),
+	     varSim(getLastIt(horiH),vari="protruding_rim")
+	     )
+rownames(j)=c("VT","VT+HT(d)","VT+HT")
+plotDensities(t(j),colnames(t(j)))
+
+juntosPR=rbind(
+	     varSim(getLastIt(verti),vari="protruding_rim"),
+	     varSim(getLastIt(hori),vari="protruding_rim"),
+	     varSim(getLastIt(horiH),vari="protruding_rim")
+	     #varSim(getLastIt(horimas))
+	     )
+rownames(juntosPR)=c("VT","VT+HT(d)","VT+HT")
+pdf("PR_densities.pdf",pointsize=17)
+plotDensities(t(juntosPR),colnames(t(juntosPR)))
+abline(v=sd(tapply(emp$protruding_rim,emp$site,mean)),col="red",lwd=3)
+text(sd(tapply(emp$protruding_rim,emp$site,mean))+0.8,.23,"dataset variation of means",srt=90,col="red",cex=.7)
+dev.off()
+
+juntos=rbind(
+	     varSim(getLastIt(verti),vari="exterior_diam"),
+	     varSim(getLastIt(hori),vari="exterior_diam"),
+	     varSim(getLastIt(horiH),vari="exterior_diam")
+	     )
+rownames(juntos)=c("VT","VT+HT(d)","VT+HT")
+pdf("../../doc/YSLR_Manchester/images/ED_densities.pdf",pointsize=17)
+plotDensities(t(juntos),colnames(t(juntos)))
+abline(v=sd(tapply(emp$exterior_diam,emp$site,mean)),col="red",lwd=3)
+text(sd(tapply(emp$exterior_diam,emp$site,mean))+0.8,.25,"dataset variation of means",srt=90,col="red",cex=.7)
+dev.off()
+
+pdf("PR_densities.pdf",pointsize=17)
+vioplot3(t(juntosPR),ylim=c(0,,max(juntosPR)),ylab="Interworkshops variation (cm)",xlab="P(T)",xaxt="n")
+abline(h=sd(tapply(emp$protruding_rim,emp$site,mean)),col="red",lwd=3)
+text(sd(tapply(emp$protruding_rim,emp$site,mean))+0.8,.23,"dataset variation of means",srt=90,col="red",cex=.7)
+dev.off()
+
+juntos=rbind(
+	     varSim(getLastIt(verti),vari="exterior_diam"),
+	     varSim(getLastIt(hori),vari="exterior_diam"),
+	     varSim(getLastIt(horiH),vari="exterior_diam")
+	     )
+rownames(juntos)=c("VT","VT+HT(d)","VT+HT")
+pdf("images/ED_densities.pdf",pointsize=17)
+vioplot3(t(juntos),ylim=c(0,max(juntos)),ylab="Interworkshops variation (cm)",xlab="",xaxt="n")
+abline(h=sd(tapply(emp$exterior_diam,emp$site,mean)),col="red",lwd=3)
+text(sd(tapply(emp$exterior_diam,emp$site,mean))+0.8,.25,"dataset variation of means",srt=90,col="red",cex=.7)
+dev.off()
 }
 
 YSLR_man   <-  function(){
@@ -366,7 +423,7 @@ plotDensities <- function(datas,epsilon,...){
     legend("topright",legend=epsilon,fill=htcolF,title="model")
 }
 
-
+emp <- getRealMeasurment() #load the mesuremant from data/drespaper.csv and remove Dressel 23
 # A simple function to :
 #load the mesuremant from data/drespaper.csv and remove Dressel 23
 getRealMeasurment <- function() {
