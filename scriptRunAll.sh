@@ -1,3 +1,4 @@
+#script to run expe
 time=10000
 for m in "HT" "VT" "HTD";
 do
