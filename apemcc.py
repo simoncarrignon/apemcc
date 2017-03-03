@@ -32,6 +32,7 @@ class Workshop(object):
     id=""
     all_measures={}
     prod_rate=5
+    mutation_power=.1
 
     #This function allow us to create a new workshop 
     def __init__(self, id, dist,all_measures,prod_rate):
@@ -69,14 +70,14 @@ class Workshop(object):
         for measure in self.all_measures:
             up=-1 #increase or decrease the value
             if(random.randint(0,1)):up=1 #randomly  increase or decrease the size
-            self.all_measures[measure]["mean"] = self.all_measures[measure]["mean"] + random.random()*10*up
+            self.all_measures[measure]["mean"] = self.all_measures[measure]["mean"] + self.all_measures[measure]["mean"]* self.mutation_power  *up
 
     def copy(self,ws2):
         for measure in self.all_measures:
             up=-1
             if(random.randint(0,1)):up=1
-            self.all_measures[measure]["mean"] = ws2.all_measures[measure]["mean"] #+ random.random()*2*up
-            #self.all_measures["exterior_diam"]["sd"] = ws2.all_measures["exterior_diam"]["sd"] + random.random()*self.all_measures["exterior_diam"]["sd"]-self.all_measures["exterior_diam"]["sd"]
+            self.all_measures[measure]["mean"] = ws2.all_measures[measure]["mean"] +  self.all_measures[measure]["mean"]*self.mutation_power  *up
+            self.all_measures[measure]["sd"] = ws2.all_measures[measure]["sd"]+  self.all_measures[measure]["sd"]*self.mutation_power  *up # + random.random()*self.all_measures["exterior_diam"]["sd"]-self.all_measures["exterior_diam"]["sd"]
 
     #def dist(self,ws2):
     #    return(mat_dist[self.id,ws2.id])
@@ -117,6 +118,9 @@ def main(argv):
            outfile = str(arg)
         elif opt == "-m":
            model = str(arg)
+           
+       
+           
 #########################
 ##TODO: allow to easily switch from workshop in a file vs workshop created onthefly
 
@@ -155,27 +159,31 @@ def main(argv):
 
     for ws in  {"villaseca","belen","malpica","delicias","parlamento"}:
         dist=10 #this is not use in that case as the "distance" are given by the dictionnary world_dict
-        new_ws= Workshop(ws,dist,{"exterior_diam":{"mean":167.7,"sd":12.26},"protruding_rim":{"mean":19,"sd":5.6}, "rim_w":{"mean":36.29,"sd": 4.76}, "rim_w_2":{"mean": 30.35,"sd": 5.38}},100)
+        new_ws= Workshop(ws,dist,{"exterior_diam":{"mean":167.90,"sd":11.49},"protruding_rim":{"mean":18.30,"sd":6.136}, "rim_w":{"mean":37.23,"sd": 4.76}, "rim_w_2":{"mean": 31.24,"sd": 4.14}},10)
         world.append(new_ws)
 
+    p_mu=.001 ##mutation probability 1 other 1000 .1 percent
+    p_copy=.01 ##probability of copy
+    d_weight=1 #weight of the distance
+    
 ##begin of the simulation
     print "starting the simulation with copy mechanism:",model
     for t in range(0,max_time,1):  
         for ws in world :
-            if( t%1000 ==0): 
+            if( t%10000 ==0): 
                 ws.writeProduction(t,prodfile)
                 #print "timestep:", str(t)
-            if( random.random()<.001):
+            if( random.random()< p_mu):
                 ws.mutate()
             n=random.randint(0,(n_ws-1))
             ws2 = world[n]
-            if( ws.id != ws2.id and random.random() < .01):  #with a 1/100 proba we initialize a copy
+            if( ws.id != ws2.id and random.random() < p_copy):  #with a 1/100 proba we initialize a copy
                 rel_dist=world_dist[ws2.id+ws.id] #get the distance between two given workshop
                 r=random.random()
                 if(  model == "HT"):
                     proba= 1   #no effect of distance between the workshop ie everybody copy everybody with same proba of 1/100
                 elif model== "HTD":
-                    proba=(float(rel_dist)-(8.13))/((95.33)-(8.13)) < random.random() #should be true when two workshop are close to eachother
+                    proba=((float(rel_dist)-(8.13))/((95.33)-(8.13)))*d_weight < random.random() #should be true when two workshop are close to eachother
                 elif model == "VT": 
                     proba= 0
 
