@@ -6,12 +6,12 @@ if(require("vegan")){library(vegan)}
 
 
 ##Some command use to analyse the output of the model used with theoretical distances and some examples
-#analyseModel<-function(){} if you want to create a function use this line. Remember close with {}
+analyseModel<-function(){i # you want to create a function use this line. Remember close with {}
 
     model=read.csv("result.csv")  
     #model=model[!is.na(model)]
     model=model[model$time >= max(model$time)-1000,]
-    lastItmodel=getLastIt(model)
+    lastItmodel=getIt(model)
     #cubeCC=cubeC[cubeC$time >= max(cubeC$time)-1000,]; 
     #model=model[order(model$dist),];
    
@@ -29,7 +29,7 @@ png("CYDS.png")
 boxplot(model$exterior_diam ~ model$dist,ylab="exterior_rim",xlab="workshop",xaxt="n")
 axis(1,labels=levels(model$workshop),at=1:length(unique(model$dist)))
 dev.off()
-    
+    }
 
 ##Below a collection of commands used to explore the real data
 ## Exemple: to extract the mean of different measurement etc...
@@ -73,10 +73,10 @@ analyseRealData<-function(){
 
     defN5=read.csv("lineC/lineC_100_N5.csv")
     defN5=defN5[defN5$time == max(defN5$time),]
-    vioplot2(getLastIt(defN5),"workshop","exterior_diam")
+    vioplot2(getIt(defN5),"workshop","exterior_diam")
     sd(tapply(emp$exterior_diam,emp$site,mean))
 
-    ##this three line allo to see how the mean of the exterior diam evolve during time(
+    ##this three lines allow to see how the mean of the exterior diam evolve during time
     tsd=c()
     for(i in unique(defN4$time)){
 	tsd=c(tsd,sd(tapply(defN4$exterior_diam[defN4$time==i],defN4$workshop[defN4$time==i],mean)))
@@ -116,9 +116,9 @@ analyseRealData<-function(){
     ##LAST GRAPH (preversions of the graphs used for manchester and deimburgh conf == the )
     all_extdiam=c()
     all_extdiam=rbind(
-		 varSim(getLastIt(lineNC)),
-		 varSim(getLastIt(cubeC)),
-		 varSim(getLastIt(lineC))
+		 varSim(getIt(lineNC)),
+		 varSim(getIt(cubeC)),
+		 varSim(getIt(lineC))
 		 )
     rownames(all_extdiam)=c("","","")#expression(frac(1,d^3)),"1/d")
     pdf("interworkshopvar.pdf",pointsize=20)
@@ -129,10 +129,10 @@ analyseRealData<-function(){
 
     colnames(u)[ncol(u)]="PA"
     all_extdiam=rbind(all_extdiam,u)
-    u=cbind(getLastIt(lineC),"lineC")
+    u=cbind(getIt(lineC),"lineC")
     colnames(u)[ncol(u)]="PA"
     all_extdiam=rbind(all_extdiam,u)
-    u=cbind(getLastIt(cubeC),"cubeC")
+    u=cbind(getIt(cubeC),"cubeC")
     colnames(u)[ncol(u)]="PA"
     all_extdiam=rbind(all_extdiam,u)
 
@@ -147,7 +147,7 @@ analyseRealData<-function(){
 }
 
 
-#########CODE EXAMPLE##################
+#########CODE CAA 2017 EXAMPLES##################
 
 
 YSLR_man   <-  function(){
@@ -166,13 +166,12 @@ YSLR_man   <-  function(){
     horiH=readFolder("HT/")
     hori=readFolder("HTD/")
     
-    ###
-
-    ##a simple test:
+   
+    ##a simple test to analyze the sample
     j=rbind(
-	    varSim(getLastIt(verti),vari="protruding_rim"),
-	    varSim(getLastIt(hori),vari="protruding_rim"),
-	    varSim(getLastIt(horiH),vari="protruding_rim")
+	    varSim(getIt(verti),vari="protruding_rim"),
+	    varSim(getIt(hori),vari="protruding_rim"),
+	    varSim(getIt(horiH),vari="protruding_rim")
 	    ) #=>> this allow to bind together the result of different model
 
     rownames(j)=c("VT","VT+HT(d)","VT+HT") #this allows to change the names of the models
@@ -180,14 +179,26 @@ YSLR_man   <-  function(){
     plotDensities(t(j),colnames(t(j))) #this plot the result of the previous command as 
     #######TESTING WITH MEASUREMENTS#########
     
+    
+    #charge the data
+    
+    emp <- getRealMeasurment() #load the mesuremant from data/drespaper.csv and remove Dressel 23
+    # A simple function to :
+    #load the mesuremant from data/drespaper.csv and remove Dressel 23
+    getRealMeasurment <- function() {
+    res=read.csv("data/drespaper.csv")
+    res=res[ res$type %in% c("Dressel C","Dressel D","Dressel E") ,]
+    res
+    }
+   
+   
     #protruding_rim
 
     all_protrim=rbind(
-		   varSim(getLastIt(verti),vari="protruding_rim"),
-		   varSim(getLastIt(hori),vari="protruding_rim"),
-		   varSim(getLastIt(horiH),vari="protruding_rim")
-		   #varSim(getLastIt(horimas))
-		   )
+	           varSim(getIt(verti),vari="protruding_rim"),
+		   varSim(getIt(hori),vari="protruding_rim"),
+		   varSim(getIt(horiH),vari="protruding_rim"))
+		   #varSim(getIt(horimas))
     rownames(all_protrim)=c("VT","VT+HT(d)","VT+HT")
     #all_protrim contains the variation beetween workshop at the end of the simulation for all the model we want to compare
 
@@ -200,9 +211,9 @@ YSLR_man   <-  function(){
     #exterior_diam
 
     all_extdiam=rbind(
-		 varSim(getLastIt(verti),vari="exterior_diam"), #get last it allow to get the result of the last iteration and var sim allow to compute the variation of the mean between all diamter
-		 varSim(getLastIt(hori),vari="exterior_diam"),
-		 varSim(getLastIt(horiH),vari="exterior_diam")
+		 varSim(getIt(verti),vari="exterior_diam"), #get last it allow to get the result of the last iteration and var sim allow to compute the variation of the mean between all diamter
+		 varSim(getIt(hori),vari="exterior_diam"),
+		 varSim(getIt(horiH),vari="exterior_diam")
 		 )
     rownames(all_extdiam)=c("VT","VT+HT(d)","VT+HT")
     #all_extdiam contains the same that all_protrim but for the variation of exterior diameter 
@@ -216,39 +227,37 @@ YSLR_man   <-  function(){
     #rim_w
     
     all_rim_w=rbind(
-		 varSim(getLastIt(verti),vari="rim_w"), #get last it allow to get the result of the last iteration and var sim allow to compute the variation of the mean between all diamter
-		 varSim(getLastIt(hori),vari="rim_w"),
-		 varSim(getLastIt(horiH),vari="rim_w")
+		 varSim(getIt(verti),vari="rim_w"), #get last it allow to get the result of the last iteration and var sim allow to compute the variation of the mean between all diamter
+		 varSim(getIt(hori),vari="rim_w"),
+		 varSim(getIt(horiH),vari="rim_w")
 		 )
     rownames(all_rim_w)=c("VT","VT+HT(d)","VT+HT")
     #all_extdiam contains the same that all_protrim but for the variation of rim_w 
 
-    pdf("images/ED_densities.pdf",pointsize=17)
+    pdf("images/rim_densities.pdf",pointsize=17)
     plotDensities(t(all_rim_w),colnames(t(all_rim_w)))
     abline(v=sd(tapply(emp$rim_w,emp$site,mean)),col="red",lwd=3)
     text(sd(tapply(emp$rim_w,emp$site,mean))+0.8,.25,"dataset variation of means",srt=90,col="red",cex=.7)
     dev.off()
-    
+     
     #rim_w_2
     
     all_rim_w_2=rbind(
-		 varSim(getLastIt(verti),vari="rim_w_2"), #get last it allow to get the result of the last iteration and var sim allow to compute the variation of the mean between all diamter
-		 varSim(getLastIt(hori),vari="rim_w_2"),
-		 varSim(getLastIt(horiH),vari="rim_w_2")
+		 varSim(getIt(verti),vari="rim_w_2"), #get last it allow to get the result of the last iteration and var sim allow to compute the variation of the mean between all diamter
+		 varSim(getIt(hori),vari="rim_w_2"),
+		 varSim(getIt(horiH),vari="rim_w_2")
 		 )
-    rownames(all_rim_w)=c("VT","VT+HT(d)","VT+HT")
+    rownames(all_rim_w_2)=c("VT","VT+HT(d)","VT+HT")
     #all_extdiam contains the same that all_protrim but for the variation of rim_w 
 
-    pdf("images/ED_densities.pdf",pointsize=17)
+    pdf("images/rim2_densities.pdf",pointsize=17)
     plotDensities(t(all_rim_w_2),colnames(t(all_rim_w_2)))
     abline(v=sd(tapply(emp$rim_w_2,emp$site,mean)),col="red",lwd=3)
     text(sd(tapply(emp$rim_w_2,emp$site,mean))+0.8,.25,"dataset variation of means",srt=90,col="red",cex=.7)
     dev.off()
     
     
-  
-
-    ###This are the old version of the graph (as used in edinburgh), with the vioplot in black and white
+    ##This are the old version of the graph (as used in edinburgh), with the vioplot in black and white
     pdf("images/PR_densities_vioplot.pdf",pointsize=17)
     vioplot3(t(all_protrim),ylim=c(0,max(all_protrim)),ylab="Interworkshops variation (cm)",xlab="P(T)",xaxt="n")
     abline(h=sd(tapply(emp$protruding_rim,emp$site,mean)),col="red",lwd=3)
@@ -263,27 +272,46 @@ YSLR_man   <-  function(){
     dev.off()
 
 
+sapply(unique(verti$time),function(i){
+
+  print(paste("time",i))
+    curT=rbind(
+		 varSim(verti[verti$time == i,],vari="exterior_diam"), #get last it allow to get the result of the last iteration and var sim allow to compute the variation of the mean between all diamter
+		 varSim(hori[hori$time == i,],vari="exterior_diam"),
+		 varSim(horiH[horiH$time == i,],vari="exterior_diam")
+		 )
+		 
+    rownames(curT)=c("VT","VT+HT(d)","VT+HT")
+    #all_extdiam contains the same that all_protrim but for the variation of rim_w 
+
+    png(paste("images/rim2_time",i,".png",sep=""),pointsize=17)
+    plotDensities(t(curT),colnames(t(curT)))
+    abline(v=sd(tapply(emp$exterior_diam,emp$site,mean)),col="red",lwd=3)
+    text(sd(tapply(emp$exterior_diam,emp$site,mean))+0.8,.25,"dataset variation of means",srt=90,col="red",cex=.7)
+    dev.off()
+})
+    
     ###Draft trandom test
-    vioplot2(getLastIt(verti),"workshop","exterior_diam")
+    vioplot2(getIt(verti),"workshop","exterior_diam")
 
     lineC=readFolder("lineC/")
     vioplot2(lineC,"workshop","exterior_diam")
 
     lineNC=readFolder("lineNC/")
-    vioplot2(getLastIt(cubeNC),"workshop","exterior_diam")
+    vioplot2(getIt(cubeNC),"workshop","exterior_diam")
 
     pn3C=readFolder("pn3/")
     vioplot3(t(varSim(limitTimeStep(pn3C,timesel) )),ylim=c(0,30),main="Evolution of interworkshop variance",ylab="Var in Exterior Diam. Mean. Size",xlab="Time")
 
     sd(lineNC$exterior_diam)
     sd(cubeC$exterior_diam)
-    sd(getLastIt(lineC)$exterior_diam)
-    sd(getLastIt(lineNC)$exterior_diam)
+    sd(getIt(lineC)$exterior_diam)
+    sd(getIt(lineNC)$exterior_diam)
 
-    diversity(getLastIt(cubeC)$exterior_diam)
-    diversity(getLastIt(cubeNC)$exterior_diam)
-    diversity(getLastIt(lineC)$exterior_diam)
-    diversity(getLastIt(lineNC)$exterior_diam)
+    diversity(getIt(cubeC)$exterior_diam)
+    diversity(getIt(cubeNC)$exterior_diam)
+    diversity(getIt(lineC)$exterior_diam)
+    diversity(getIt(lineNC)$exterior_diam)
     diversity(emp$exterior_diam)
 }
 
@@ -353,8 +381,12 @@ readFolder<-function(fname){
 }
 
 ##This function return the measurment recorded during the last iteration of the simulation
-getLastIt<-function(data){
-    return(data[data$time >= max(data$time),])
+getIt<-function(data,time="max"){
+    if(time=="max")
+      return(data[data$time >= max(data$time),])
+    else
+       return(data[data$time == time,])
+      
 }
 
 #this function compute the evolution through time of the variation (the standard deviation of the mean) between workshop of the measurement *vari*
@@ -393,7 +425,7 @@ plotDensities <- function(datas,epsilon,...){
     rangex=range(lapply(densities,function(i)range(i$x)))
     rangey=range(lapply(densities,function(i)range(i$y)))
     par(mar=c(5,5,1,1))
-    plot(density(datas),xlim=rangex,ylim=rangey,type="n",xlab="Variation of the mean size per workshop",main="",...)
+    plot(density(datas),xlim=rangex,ylim=rangey,type="n",xlab="Variation of the mean size per workshop",...)
     lapply(seq_along(densities),function(i){
 	   polygon(c(0,densities[[i]]$x,to),c(0,densities[[i]]$y,0),col=htcolF[names(densities)[i]],lwd=2)#,density=20,angle=45*i,border=htcol[names(densities)[i]])
 	   #polygon(densities[[i]],col=htcolF[names(densities)[i]],lwd=2)#,density=20,angle=45*i,border=htcol[names(densities)[i]])
@@ -403,11 +435,60 @@ plotDensities <- function(datas,epsilon,...){
     legend("topright",legend=epsilon,fill=htcolF,title="model")
 }
 
-emp <- getRealMeasurment() #load the mesuremant from data/drespaper.csv and remove Dressel 23
-# A simple function to :
-#load the mesuremant from data/drespaper.csv and remove Dressel 23
-getRealMeasurment <- function() {
-    res=read.csv("data/drespaper.csv")
-    res=res[ res$type != "Dressel 23",]
-    res
+##Fucntion that bind together the result of differents model for one particular timestep (max by default) 
+bindTimeStep<-function(list,time="max",var){
+#   res=c()
+#   sapply(list, function(model){      
+#       res=rbind(res,varSim(getIt(model,time),vari=var))
+#   })
+#   return(res)
+#   
+  
+    res=rbind(
+	           varSim(getIt(list[["verti"]],time),vari=var),
+		   varSim(getIt(list[["hori"]],time),vari=var),
+		   varSim(getIt(list[["horiH"]],time),vari=var))
+		   #varSim(getIt(horimas))
+    rownames(res)=c("VT","VT+HT(d)","VT+HT")
+  return(res)
 }
+  
+
+plotDensitiesTimeStep<-function(list,time,var){
+  tmp=bindTimeStep(list,time,var)
+  plotDensities(t(tmp),colnames(t(tmp)),main=paste("Distribution of inter workshop var for",var,"after",time,"timestep"))
+  abline(v=sd(tapply(emp[,var],emp$site,mean)),col="red",lwd=3) 
+
+}
+
+
+testMaria<-function(){
+test1= list(   
+    verti=readFolder("test1/VT/"),
+    horiH=readFolder("test1/HT/"),
+    hori=readFolder("test1/HTD/")
+    )
+ 
+    testMa= list(   
+    verti=readFolder("testMoreAmphora/VT/"),
+    horiH=readFolder("testMoreAmphora/HT/"),
+    hori=readFolder("testMoreAmphora/HTD/")
+    )
+ 
+    
+    testNMu= list(   
+    verti=readFolder("newMutationPower//VT/"),
+    horiH=readFolder("newMutationPower//HT/"),
+    hori=readFolder("newMutationPower//HTD/")
+    )
+ 
+     testN10= list(   
+    verti=readFolder("mutationPower10/VT/"),
+    horiH=readFolder("mutationPower10//HT/"),
+    hori=readFolder("mutationPower10//HTD/")
+    )
+ 
+
+
+}
+
