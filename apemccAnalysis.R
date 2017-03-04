@@ -492,3 +492,6 @@ test1= list(
 
 }
 
+getRealData <- function(){
+    t(sapply(colnames(emp)[5:12],function(i)  c(mean(tapply(emp[,i],emp$site,mean)),sd(tapply(emp[,i],emp$site,mean)))))
+}
