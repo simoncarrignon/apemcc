@@ -469,6 +469,80 @@ test1= list(
     hori=readFolder("test1/HTD/")
     )
  
+plotDensitiesTimeStep(test1,30000,"protruding_rim")
+nosd= list(   
+    verti=readFolder("nosd/VT/"),
+    horiH=readFolder("nosd/HT/"),
+    hori=readFolder("nosd/HTD/")
+    )
+onsdlow= list(   
+    verti=readFolder("onsdlow/VT/"),
+    horiH=readFolder("onsdlow/HT/"),
+    hori=readFolder("onsdlow/HTD/")
+    )
+ 
+twosd= list(   
+    verti=readFolder("twosd/VT/"),
+    horiH=readFolder("twosd/HT/"),
+    hori=readFolder("twosd/HTD/")
+    )
+
+onesd= list(   
+	    verti=readFolder("onsd/VT/"),
+    horiH=readFolder("onsd//HT/"),
+    hori=readFolder("onsd//HTD/")
+    )
+dweightBIGPRODB= list(   
+	    verti=readFolder("dweightBIGPRODB/VT/"),
+    horiH=readFolder("dweightBIGPRODB//HT/"),
+    hori=readFolder("dweightBIGPRODB//HTD/")
+    )
+pcopy1= list(   
+	    verti=readFolder("pcopy1/VT/"),
+    horiH=readFolder("pcopy1//HT/"),
+    hori=readFolder("pcopy1//HTD/")
+    )
+
+pcopy= list(   
+	    verti=readFolder("pcopy1pmut0005/VT/"),
+    horiH=readFolder("pcopy1pmut0005//HT/"),
+    hori=readFolder("pcopy1pmut0005/HTD/")
+    )
+
+pcopy1= list(   
+	    verti=readFolder("pcopy1pmut0005/VT/"),
+    horiH=readFolder("pcopy1pmut0005//HT/"),
+    hori=readFolder("pcopy1pmut0005/HTD/")
+    )
+dweightBIGPROD= list(   
+	    verti=readFolder("dweightBIGPROD/VT/"),
+    horiH=readFolder("dweightBIGPROD//HT/"),
+    hori=readFolder("dweightBIGPROD//HTD/")
+    )
+dweightM= list(   
+	    verti=readFolder("dweightM/VT/"),
+    horiH=readFolder("dweightM//HT/"),
+    hori=readFolder("dweightM//HTD/")
+    )
+dweight= list(   
+	    verti=readFolder("dweight/VT/"),
+    horiH=readFolder("dweight//HT/"),
+    hori=readFolder("dweight//HTD/")
+    )
+ 
+plotDensitiesTimeStep(nosd,10000,"protruding_rim")
+plotDensitiesTimeStep(twosd,10000,"exterior_diam")
+plotDensitiesTimeStep(onesd,10000,"exterior_diam")
+plotDensitiesTimeStep(onsdlow,10000,"exterior_diam")
+plotDensitiesTimeStep(dweightBIGPROD,20000,"exterior_diam")
+plotDensitiesTimeStep(dweightBIGPRODB,20000,"exterior_diam")
+plotDensitiesTimeStep(pcopy1,20000,"exterior_diam")
+plotDensitiesTimeStep(pcopy1pmut0005,30000,"rim_w_2")
+plotDensitiesTimeStep(dweight,20000,"protruding_rim")
+
+
+
+
     testMa= list(   
     verti=readFolder("testMoreAmphora/VT/"),
     horiH=readFolder("testMoreAmphora/HT/"),
@@ -493,5 +567,7 @@ test1= list(
 }
 
 getRealData <- function(){
-    t(sapply(colnames(emp)[5:12],function(i)  c(mean(tapply(emp[,i],emp$site,mean)),sd(tapply(emp[,i],emp$site,mean)))))
+    res=t(sapply(colnames(emp)[5:12],function(i)  c(mean(tapply(emp[,i],emp$site,mean)),sd(tapply(emp[,i],emp$site,mean)),min(emp[,i]),max(emp[,i]))))
+    colnames(res)=c("mean of mean btw ws","sd of mean btw ws","min","max")
+    return(res)
 }
