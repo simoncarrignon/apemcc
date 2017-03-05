@@ -31,8 +31,8 @@ class Workshop(object):
     dist=0
     id=""
     all_measures={}
-    prod_rate=5
-    mutation_power=.005
+    prod_rate=-1
+    mutation_power=.05
     world_lim={}
 
     #This function allow us to create a new workshop 
@@ -40,6 +40,7 @@ class Workshop(object):
         self.all_measures=all_measures
         self.world_lim=world_lim
         self.id=id
+        self.prod_rate
         self.dist=dist
         print('New workshop called '+self.id+" at : "+str(self.dist)+" km")
 
@@ -173,7 +174,8 @@ def main(argv):
     #    world.append(new_ws)
     world_lim={"exterior_diam":{"min":130,"max":200},"protruding_rim":{"min":5,"max":40}, "rim_w":{"min":25,"max": 48}, "rim_w_2":{"min": 15,"max": 44}}
 
-              #mean of mean btw ws sd of mean btw ws min max136n of mean btw ws sd of mean btw ws min max
+              #(1) mean of mean btw ws (2)sd of mean btw ws (3)min (4)max
+              #measurement:             (1)                 (2)     (3) (4)
               #exterior_diam           166.667395         4.9998310 130 200
               #inside_diam              93.631245         1.3069177  70 140
               #rim_h                    35.387083         0.8810068  25  48
@@ -196,7 +198,7 @@ def main(argv):
         world.append(new_ws)
 
     p_mu=.01 ##mutation probability 1 other 1000 .1 percent
-    p_copy=.01 ##probability of copy
+    p_copy=.1 ##probability of copy
     d_weight=.5 #weight of the distance
     
 ##begin of the simulation
