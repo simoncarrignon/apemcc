@@ -529,6 +529,18 @@ dweight= list(
     horiH=readFolder("dweight//HT/"),
     hori=readFolder("dweight//HTD/")
     )
+
+aGoodOne= list(   
+	    verti=readFolder("aGoodOne//VT/"),
+    horiH=readFolder("aGoodOne//HT/"),
+    hori=readFolder("aGoodOne//HTD/")
+    )
+
+testGALGAL= list(   
+	    verti=readFolder("testGALGAL/VT/"),
+    horiH=readFolder("testGALGAL//HT/"),
+    hori=readFolder("testGALGAL//HTD/")
+    )
  
 plotDensitiesTimeStep(nosd,10000,"protruding_rim")
 plotDensitiesTimeStep(twosd,10000,"exterior_diam")
@@ -539,6 +551,11 @@ plotDensitiesTimeStep(dweightBIGPRODB,20000,"exterior_diam")
 plotDensitiesTimeStep(pcopy1,20000,"exterior_diam")
 plotDensitiesTimeStep(pcopy1pmut0005,30000,"rim_w_2")
 plotDensitiesTimeStep(dweight,20000,"protruding_rim")
+plotDensitiesTimeStep(testGALGAL,30000,"rim_w_2")
+plotDensitiesTimeStep(aGoodOne,30000,"rim_w_2")
+plotDensitiesTimeStep(aGoodOne,30000,"rim_w")
+plotDensitiesTimeStep(aGoodOne,30000,"exterior_diam")
+plotDensitiesTimeStep(aGoodOne,30000,"protruding_rim")
 
 
 
