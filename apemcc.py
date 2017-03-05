@@ -40,7 +40,7 @@ class Workshop(object):
         self.all_measures=all_measures
         self.world_lim=world_lim
         self.id=id
-        self.prod_rate
+        self.prod_rate=prod_rate
         self.dist=dist
         print('New workshop called '+self.id+" at : "+str(self.dist)+" km")
 
@@ -74,8 +74,8 @@ class Workshop(object):
             up=-1 #increase or decrease the value
             if(random.randint(0,1)):up=1 #randomly  increase or decrease the size
             self.all_measures[measure]["mean"] = self.all_measures[measure]["mean"] + self.all_measures[measure]["mean"]* self.mutation_power  *up
-            while self.all_measures[measure]["mean"] > (self.world_lim[measure]["max"]*2) or self.all_measures[measure]["mean"] < (self.world_lim[measure]["min"]*.5):
-                if self.all_measures[measure]["mean"] > (self.world_lim[measure]["max"]*2):
+            while self.all_measures[measure]["mean"] > (self.world_lim[measure]["max"]*1.1) or self.all_measures[measure]["mean"] < (self.world_lim[measure]["min"]*.9):
+                if self.all_measures[measure]["mean"] > (self.world_lim[measure]["max"]*1.1):
                     up=-1
                 else :
                     up = 1 
@@ -197,9 +197,9 @@ def main(argv):
         new_ws= Workshop(ws,dist,{"exterior_diam":{"mean":167.90,"sd":11},"protruding_rim":{"mean":18.30,"sd":5}, "rim_w":{"mean":37.23,"sd": 2.5}, "rim_w_2":{"mean": 31.24,"sd": 4}},100,world_lim)
         world.append(new_ws)
 
-    p_mu=.01 ##mutation probability 1 other 1000 .1 percent
-    p_copy=.1 ##probability of copy
-    d_weight=.5 #weight of the distance
+    p_mu=.001 ##mutation probability 1 other 1000 .1 percent
+    p_copy=.01##probability of copy
+    d_weight=.7 #weight of the distance
     
 ##begin of the simulation
     print "starting the simulation with copy mechanism:",model
