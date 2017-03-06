@@ -104,19 +104,141 @@ class Workshop(object):
 #########################
 #########################
 
+#Definition of the Agent which are workshop in our case:
+class Experience(object):
+    n_ws=5 ##if no number of workshop given we us 5
+    max_time= 10000
+    outfile= "output"
+    model= "VT"
+    p_mu=.001
+    p_copy=.01
+    d_weight=1
+    world=list()
+    world_list=dict()
+    world_lim=list()
+    prodfile=""
+    init=""
+
+    def __init__(self,n_ws,max_time,pref,model,p_mu,p_copy,d_weight,init):
+        self.n_ws=n_ws
+        self.max_time=max_time
+        self.pref=pref #us eto classify differetn type of simulation
+        self.model=model
+        self.p_mu=p_mu
+        self.p_copy=p_copy
+        self.d_weight=d_weight
+        self.init=init
+
 ##Definition of the main function
-def main(argv):
+#########################
+##TODO: allow to easily switch from workshop in a file vs workshop created onthefly
+
+    #p_mu=.001 ##mutation probability 1 other 1000 .1 percent
+    #p_copy=.01 ##probability of copy
+    #d_weight=1 #weight of the distance
+        print 'Initialization of the world' 
+        print str(self.n_ws), 'Workshop' 
+        print 'During ', str(self.max_time), 'iterations' 
+
+        self.world = list() #initialisation of the world
+        self.world_dist=dict() #dictionnaire to store the distance of the cities two by two
+        outfilename=self.pref+"_"+"N"+str(self.n_ws)+".csv"
+        self.prodfile = open(outfilename, "w")
+        header = "time,workshop,dist,amphora,exterior_diam,protruding_rim,rim_w,rim_w_2\n"
+        self.prodfile.write(header)
+        pn=5
+
+        self.world_lim={"exterior_diam":{"min":130,"max":200},"protruding_rim":{"min":5,"max":40}, "rim_w":{"min":25,"max": 48}, "rim_w_2":{"min": 15,"max": 44}}
+        if self.init=="file":
+            with open('data/distmetrics.csv','rb') as distfile:
+                  distances = csv.reader(distfile, delimiter=',')
+                  for row in distances:
+                      self.world_dist[row[0]+row[1]]=float(row[2]) #print(row)
+                      self.world_dist[row[1]+row[0]]=float(row[2]) #print(row)
+                  #worldlist[distances[1]] = {distances[2],distances[3]}
+        
+            #forloop to create the wanted number of workshop an position them at equal distance
+            #Should be used only in the theoretical case (as presented in Birmingham 2016)
+
+
+                  #(1) mean of mean btw ws (2)sd of mean btw ws (3)min (4)max
+                  #measurement:             (1)                 (2)     (3) (4)
+                  #exterior_diam           166.667395         4.9998310 130 200
+                  #inside_diam              93.631245         1.3069177  70 140
+                  #rim_h                    35.387083         0.8810068  25  48
+                  #rim_w                    36.686752         1.9171952  25  48
+                  #shape_w                   9.646956         0.6530906   5  14
+                  #rim_inside_h             28.373472         1.1329995  20  39
+                  #rim_w_2                  31.054947         1.2328019  15  44
+                  #protruding_rim           18.273888         3.2735080   5  40
+ #exteri    or_diam    inside_diam          rim_h          rim_w        shape_w  rim_inside_h        rim_w_2 protruding_rim
+ #     1    1.126504       9.250002       3.004174       3.494843       1.080722       2.976005       4.216725       4.790658
+            #the mean standard deviation for every measurment
+            
+
+
+            for ws in  {"villaseca","belen","malpica","delicias","parlamento"}:
+                dist=10 #this is not use in that case as the "distance" are given by the dictionnary world_dict
+                new_ws= Workshop(ws,dist,{"exterior_diam":{"mean":167.90,"sd":11},"protruding_rim":{"mean":18.30,"sd":5}, "rim_w":{"mean":37.23,"sd": 2.5}, "rim_w_2":{"mean": 31.24,"sd": 4}},100,self.world_lim)
+                self.world.append(new_ws)
+        elif self.init=="art":
+            for ws in range(0,n_ws,1):
+                dist=ws
+                #if(ws > 3):
+                #    dist=ws+3
+                #if ws > 6:
+                #    dist=ws+9
+                new_ws= Workshop('ws_'+str(ws),dist,{"exterior_diam":{"mean":167.7+ws,"sd":12.26},"protruding_rim":{"mean":19+ws,"sd":5.6}},10,self.world_lim)
+                self.world.append(new_ws)
+
+
+
+    def run(self):
+
+##be    gin of the simulation
+        print "starting the simulation with copy mechanism:",model
+        for t in range(0,max_time,1):  
+            for ws in self.world :
+                if( t%10000 ==0): 
+                    ws.writeProduction(t,self.prodfile)
+                    #print "timestep:", str(t)
+                if( random.random()< p_mu):
+                    ws.mutate()
+                n=random.randint(0,(n_ws-1))
+                ws2 = self.world[n]
+                if( ws.id != ws2.id and random.random() < self.p_copy):  #with a 1/100 proba we initialize a copy
+                    if(self.init=="file"):
+                        rel_dist=self.world_dist[ws2.id+ws.id] #get the distance between two given workshop
+                        rel_dist=((float(rel_dist)-(8.13))/((95.33)-(8.13)))
+                    elif self.init == "art":
+                        rel_dist=ws2.dist-ws.dist
+                    r=random.random()
+                    if(  model == "HT"):
+                        proba= 1   #no effect of distance between the workshop ie everybody copy everybody with same proba of 1/100
+                    elif model== "HTD":
+                        proba= rel_dist < random.random()*self.d_weight  #should be true when two workshop are close to eachother
+                    elif model == "VT": 
+                        proba= 0
+
+                    if proba:
+                        ws.copy(ws2)  
+        print "simulation done."
+
+
+
+if __name__ == "__main__":
+    argv=sys.argv[1:]
 
     #initialisation of the variable used during the simulation
-    n_ws = 0   
+    ntws = 0   
     max_time = 0
     outfile = "default"
 
 ###Folling lines using to parse the arguments from the command line
-    use='apemcc.py -w <number of Workshop> -t <time> -f <file> -m <model>\n model should be in {"HT","HTD","VT"}'
+    use='apemcc.py -w <number of Workshop> -t <time> -f <file> -m <model> -i <init>\n init should be in {"art","file"}\n model should be in {"HT","HTD","VT"}'
 
     try:
-        opts, args = getopt.getopt(argv,"hw:t:f:m:",)
+        opts, args = getopt.getopt(argv,"hw:t:f:m:i:",)
     except getopt.GetoptError:
         print use
         sys.exit(2)
@@ -135,102 +257,12 @@ def main(argv):
            outfile = str(arg)
         elif opt == "-m":
            model = str(arg)
+        elif opt == "-i":
+           init = str(arg)
            
-       
-           
-#########################
-##TODO: allow to easily switch from workshop in a file vs workshop created onthefly
-
-    print str(n_ws), 'Workshop' 
-    print 'During ', str(max_time), 'iterations' 
-
-    world = list() #initialisation of the world
-    world_dist=dict() #dictionnaire to store the distance of the cities two by two
-
-    with open('data/distmetrics.csv','rb') as distfile:
-          distances = csv.reader(distfile, delimiter=',')
-          for row in distances:
-              world_dist[row[0]+row[1]]=float(row[2]) #print(row)
-              world_dist[row[1]+row[0]]=float(row[2]) #print(row)
-          #worldlist[distances[1]] = {distances[2],distances[3]}
-
-
-    outfilename=outfile+"_"+"N"+str(n_ws)+".csv"
-    prodfile = open(outfilename, "w")
-    header = "time,workshop,dist,amphora,exterior_diam,protruding_rim,rim_w,rim_w_2\n"
-    prodfile.write(header)
-    pn=5
-    
-    #forloop to create the wanted number of workshop an position them at equal distance
-    #Should be used only in the theoretical case (as presented in Birmingham 2016)
-
-    #for ws in range(0,n_ws,1):
-    #    dist=ws
-    #    #if(ws > 3):
-    #    #    dist=ws+3
-    #    #if ws > 6:
-    #    #    dist=ws+9
-    #    new_ws= Workshop('ws_'+str(ws),dist,{"exterior_diam":{"mean":167.7+ws,"sd":12.26},"protruding_rim":{"mean":19+ws,"sd":5.6}},10)
-    #    world.append(new_ws)
-    world_lim={"exterior_diam":{"min":130,"max":200},"protruding_rim":{"min":5,"max":40}, "rim_w":{"min":25,"max": 48}, "rim_w_2":{"min": 15,"max": 44}}
-
-              #(1) mean of mean btw ws (2)sd of mean btw ws (3)min (4)max
-              #measurement:             (1)                 (2)     (3) (4)
-              #exterior_diam           166.667395         4.9998310 130 200
-              #inside_diam              93.631245         1.3069177  70 140
-              #rim_h                    35.387083         0.8810068  25  48
-              #rim_w                    36.686752         1.9171952  25  48
-              #shape_w                   9.646956         0.6530906   5  14
-              #rim_inside_h             28.373472         1.1329995  20  39
-              #rim_w_2                  31.054947         1.2328019  15  44
-              #protruding_rim           18.273888         3.2735080   5  40
-
-
- #exterior_diam    inside_diam          rim_h          rim_w        shape_w  rim_inside_h        rim_w_2 protruding_rim
- #     11.126504       9.250002       3.004174       3.494843       1.080722       2.976005       4.216725       4.790658
-        #the mean standard deviation for every measurment
-        
-        
-
-    for ws in  {"villaseca","belen","malpica","delicias","parlamento"}:
-        dist=10 #this is not use in that case as the "distance" are given by the dictionnary world_dict
-        new_ws= Workshop(ws,dist,{"exterior_diam":{"mean":167.90,"sd":11},"protruding_rim":{"mean":18.30,"sd":5}, "rim_w":{"mean":37.23,"sd": 2.5}, "rim_w_2":{"mean": 31.24,"sd": 4}},100,world_lim)
-        world.append(new_ws)
-
     p_mu=.001 ##mutation probability 1 other 1000 .1 percent
-    p_copy=.01##probability of copy
+    p_copy=.01 ##probability of copy
     d_weight=.7 #weight of the distance
-    
-##begin of the simulation
-    print "starting the simulation with copy mechanism:",model
-    for t in range(0,max_time,1):  
-        for ws in world :
-            if( t%10000 ==0): 
-                ws.writeProduction(t,prodfile)
-                #print "timestep:", str(t)
-            if( random.random()< p_mu):
-                ws.mutate()
-            n=random.randint(0,(n_ws-1))
-            ws2 = world[n]
-            if( ws.id != ws2.id and random.random() < p_copy):  #with a 1/100 proba we initialize a copy
-                rel_dist=world_dist[ws2.id+ws.id] #get the distance between two given workshop
-                r=random.random()
-                if(  model == "HT"):
-                    proba= 1   #no effect of distance between the workshop ie everybody copy everybody with same proba of 1/100
-                elif model== "HTD":
-                    proba=((float(rel_dist)-(8.13))/((95.33)-(8.13))) < random.random()*d_weight #should be true when two workshop are close to eachother
-                elif model == "VT": 
-                    proba= 0
 
-                if proba:
-                    ws.copy(ws2)  
-
-    prodfile.close()
-    print "simulation done."
-
-
-
-
-#
-if __name__ == "__main__":
-    main(sys.argv[1:])
+    main_exp=Experience(n_ws,max_time,outfile,model,p_mu,p_copy,d_weight,"file")
+    main_exp.run()
