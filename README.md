@@ -1,2 +1,2 @@
 # apemcc
-Amphora Production, a Evolutionary model of culture change
+Amphora Production, an Evolutionary model of culture change
