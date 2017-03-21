@@ -193,9 +193,9 @@ class Experience(object):
 
 
 
-    def run(self):
+    def run(self): ##main fyunction of the class Experiment => run a simulation
 
-##be    gin of the simulation
+##begining of the simulation
         print "starting the simulation with copy mechanism:",model
         for t in range(0,max_time,1):  
             for ws in self.world :
@@ -265,4 +265,5 @@ if __name__ == "__main__":
     d_weight=.7 #weight of the distance
 
     main_exp=Experience(n_ws,max_time,outfile,model,p_mu,p_copy,d_weight,"file")
+
     main_exp.run()
