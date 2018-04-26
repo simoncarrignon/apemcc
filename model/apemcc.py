@@ -40,6 +40,7 @@ class CCSimu(object):
     world_lim=list()
     prodfile=""
     init=""
+    rate_depo=1000 #the rate at wish workshop will write their deposit in the outputfile
 
     def __init__(self,n_ws,max_time,pref,model,p_mu,p_copy,d_weight,init):
         self.n_ws=n_ws
@@ -123,7 +124,7 @@ class CCSimu(object):
         print("starting the simulation with copy mechanism: "+str(self.model))
         for t in range(0,self.max_time,1):  
             for ws in self.world :
-                if( t%1 ==0): 
+                if( t%self.rate_depo ==0): 
                     ws.writeProduction(t,self.prodfile)
                 if( random.random()< self.p_mu):
                     ws.mutate()
