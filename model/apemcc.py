@@ -264,6 +264,6 @@ if __name__ == "__main__":
     p_copy=.01 ##probability of copy
     d_weight=.7 #weight of the distance
 
-    main_exp=Experience(n_ws,max_time,outfile,model,p_mu,p_copy,d_weight,"file")
+    main_exp=Experience(n_ws,max_time,outfile,model,p_mu,p_copy,d_weight,init)
 
     main_exp.run()
