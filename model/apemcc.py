@@ -27,8 +27,8 @@ from Workshop import Workshop #import the agent class
 #"villaseca","parlamento",95.33
 
 #Definition of the Agent which are workshop in our case:
-class Experience(object):
-    n_ws=5 ##if no number of workshop given we us 5
+class CCSimu(object):
+    n_ws=-1 ##if no number of workshop given we us 5
     max_time= 10000
     outfile= "output"
     model= "VT"
@@ -64,15 +64,13 @@ class Experience(object):
 
         self.world = list() #initialisation of the world
         self.world_dist=dict() #dictionnaire to store the distance of the cities two by two
-        outfilename=self.pref+"_"+"N"+str(self.n_ws)+".csv"
-        self.prodfile = open(outfilename, "w")
-        header = "time,workshop,dist,amphora,exterior_diam,protruding_rim,rim_w,rim_w_2\n"
-        self.prodfile.write(header)
+
         pn=5
 
         self.world_lim={"exterior_diam":{"min":130,"max":200},"protruding_rim":{"min":5,"max":40}, "rim_w":{"min":25,"max": 48}, "rim_w_2":{"min": 15,"max": 44}}
         if self.init=="file":
             print("initialize the workshop using the file 'data/distmetrics.csv'")
+            print("warning:argument"+" number of workshop"+" will be ignored")
             with open('data/distmetrics.csv','rb') as distfile:
                   distances = csv.reader(distfile, delimiter=',')
                   for row in distances:
@@ -101,9 +99,10 @@ class Experience(object):
                 dist=10 #this is not use in that case as the "distance" are given by the dictionnary world_dict
                 new_ws= Workshop(ws,dist,{"exterior_diam":{"mean":167.90,"sd":11},"protruding_rim":{"mean":18.30,"sd":5}, "rim_w":{"mean":37.23,"sd": 2.5}, "rim_w_2":{"mean": 31.24,"sd": 4}},100,self.world_lim)
                 self.world.append(new_ws)
+            self.n_ws=len(self.world)
 
         elif self.init=="art":
-            for ws in range(0,n_ws,1):
+            for ws in range(self.n_ws):
                 dist=ws
                 #if(ws > 3):
                 #    dist=ws+3
@@ -112,6 +111,10 @@ class Experience(object):
                 new_ws= Workshop('ws_'+str(ws),dist,{"exterior_diam":{"mean":167.7+ws,"sd":12.26},"protruding_rim":{"mean":19+ws,"sd":5.6}},10,self.world_lim)
                 self.world.append(new_ws)
 
+        outfilename=self.pref+"_"+"N"+str(self.n_ws)+".csv"
+        self.prodfile = open(outfilename, "w")
+        header = "time,workshop,dist,amphora,exterior_diam,protruding_rim,rim_w,rim_w_2\n"
+        self.prodfile.write(header)
 
 
     def run(self): ##main function of the class Experiment => run a simulation
@@ -120,7 +123,7 @@ class Experience(object):
         print("starting the simulation with copy mechanism: "+str(self.model))
         for t in range(0,self.max_time,1):  
             for ws in self.world :
-                if( t%10000 ==0): 
+                if( t%1 ==0): 
                     ws.writeProduction(t,self.prodfile)
                 if( random.random()< self.p_mu):
                     ws.mutate()
