@@ -92,8 +92,9 @@ class CCSimu(object):
                  #exteri    or_diam    inside_diam          rim_h          rim_w        shape_w  rim_inside_h        rim_w_2 protruding_rim
                  #     1    1.126504       9.250002       3.004174       3.494843       1.080722       2.976005       4.216725       4.790658
             #the mean standard deviation for every measurment
-            self.mindist=self.world_dist[min(self.world_dist)]
-            self.maxdist=self.world_dist[max(self.world_dist)]
+            self.maxdist=max(self.world_dist.values())
+            self.mindist=min(self.world_dist.values())
+             
             for ws in  {"villaseca","belen","malpica","delicias","parlamento"}:
                 dist=10 #this is not use in that case as the "distance" are given by the dictionnary world_dict
                 new_ws= Workshop(ws,dist,{"exterior_diam":{"mean":167.90,"sd":11},"protruding_rim":{"mean":18.30,"sd":5}, "rim_w":{"mean":37.23,"sd": 2.5}, "rim_w_2":{"mean": 31.24,"sd": 4}},100,self.world_lim)
@@ -116,9 +117,13 @@ class CCSimu(object):
         header = "time,workshop,dist,amphora,exterior_diam,protruding_rim,rim_w,rim_w_2\n"
         self.prodfile.write(header)
 
+    def getrelativedist(self,dis):
+        return((float(dis)-(self.mindist))/((self.maxdist)-(self.mindist)))
+
 
     def run(self): ##main function of the class Experiment => run a simulation
 
+        relative=True
 ##begining of the simulation
         print("starting the simulation with copy mechanism: "+str(self.model))
         for t in range(0,self.max_time,1):  
@@ -131,15 +136,18 @@ class CCSimu(object):
                 ws2 = self.world[n]
                 if( ws.id != ws2.id and random.random() < self.p_copy):  #with a 1/100 proba we initialize a copy
                     if(self.init=="file"):
-                        rel_dist=self.world_dist[ws2.id+ws.id] #get the distance between two given workshop
-                        rel_dist=((float(rel_dist)-(self.mindist))/((self.maxdist)-(self.mindist)))
+                        dist=self.world_dist[ws2.id+ws.id] #get the distance between two given workshop
+                        print("abs: "+str(dist))
+                        if(relative):
+                            dist=self.getrelativedist(dist)
+                        print(dist)
                     elif self.init == "art":
-                        rel_dist=ws2.dist-ws.dist
+                        dist=ws2.dist-ws.dist
                     r=random.random()
                     if(  self.model == "HT"):
                         proba= 1   #no effect of distance between the workshop ie everybody copy everybody with same proba of 1/100
                     elif self.model== "HTD":
-                        proba= rel_dist < random.random()*self.d_weight  #should be true when two workshop are close to eachother
+                        proba= dist < random.random()*self.d_weight  #should be true when two workshop are close to eachother
                     elif self.model == "VT": 
                         proba= 0
 
