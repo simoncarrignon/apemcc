@@ -32,6 +32,12 @@ class CCSimu(object):
     max_time= 10000
     outfile= "output"
     model= "VT"
+
+    #Some usual default parameters:
+    #p_mu=.001 ##mutation probability 1 other 1000 .1 percent
+    #p_copy=.01 ##probability of copy
+    #d_weight=1 #weight of the distance 
+
     p_mu=.001
     p_copy=.01
     d_weight=1
@@ -52,13 +58,6 @@ class CCSimu(object):
         self.d_weight=d_weight
         self.init=init
 
-##Definition of the main function
-#########################
-##TODO: allow to easily switch from workshop in a file vs workshop created onthefly
-
-    #p_mu=.001 ##mutation probability 1 other 1000 .1 percent
-    #p_copy=.01 ##probability of copy
-    #d_weight=1 #weight of the distance
         print 'Initialization of the world' 
         print str(self.n_ws), 'Workshop' 
         print 'During ', str(self.max_time), 'iterations' 
@@ -79,9 +78,6 @@ class CCSimu(object):
                       self.world_dist[row[1]+row[0]]=float(row[2]) #print(row)
                   #worldlist[distances[1]] = {distances[2],distances[3]}
         
-            #forloop to create the wanted number of workshop an position them at equal distance
-            #Should be used only in the theoretical case (as presented in Birmingham 2016)
-
 
                   #(1) mean of mean btw ws (2)sd of mean btw ws (3)min (4)max
                   #measurement:             (1)                 (2)     (3) (4)
@@ -103,6 +99,7 @@ class CCSimu(object):
             self.n_ws=len(self.world)
 
         elif self.init=="art":
+            print("initialize"+str(self.n_ws)+" workshop randomly")
             for ws in range(self.n_ws):
                 dist=ws
                 #if(ws > 3):
