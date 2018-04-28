@@ -607,6 +607,8 @@ getRealData <- function(){
     res
     }
 
+
+    ###Testing normal distribution assumptions
     graphAllhist <- function(){
         #pdf("../doc/distrib_allmeasurment_dresseltype.pdf",width=14,height=14)
         par(oma=rep(1,4),mar=rep(1.2,4),mfrow=c(length(unique(res$type))+1,length(colnames(res[5:12]))+1))
