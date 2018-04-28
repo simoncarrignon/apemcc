@@ -1,4 +1,5 @@
 ###Firs tthings:  load the file using : source("apemccAnalysis.R")
+
 ## then try to run the command that are inside the function analyseRealData(),analyseModelNotReal(),YSLR_man()
 
 if(require("vioplot")){library(vioplot)}
@@ -65,7 +66,7 @@ analyseRealData<-function(){
     vioplot2(emp,"site","protruding_rim",main="Size of the protruding rim in each workshop")
     dev.off()
 
-    defN4=read.csv("default_N4.csv")
+    defN4=read.csv("../aaahou_N5.csv")
     vioplot2(defN4,"workshop","exterior_diam")
 
     defN5=read.csv("testE_N5.csv")
@@ -185,11 +186,6 @@ YSLR_man   <-  function(){
     emp <- getRealMeasurment() #load the mesuremant from data/drespaper.csv and remove Dressel 23
     # A simple function to :
     #load the mesuremant from data/drespaper.csv and remove Dressel 23
-    getRealMeasurment <- function() {
-    res=read.csv("data/drespaper.csv")
-    res=res[ res$type %in% c("Dressel C","Dressel D","Dressel E") ,]
-    res
-    }
    
    
     #protruding_rim
@@ -604,3 +600,37 @@ getRealData <- function(){
     colnames(res)=c("mean of mean btw ws","sd of mean btw ws","min","max")
     return(res)
 }
+
+    getRealMeasurment <- function() {
+    res=read.csv("../data/drespaper.csv")
+    res=res[ res$type %in% c("Dressel C","Dressel D","Dressel E") ,]
+    res
+    }
+
+    graphAllhist <- function(){
+        #pdf("../doc/distrib_allmeasurment_dresseltype.pdf",width=14,height=14)
+        par(oma=rep(1,4),mar=rep(1.2,4),mfrow=c(length(unique(res$type))+1,length(colnames(res[5:12]))+1))
+        sapply(c("",colnames(res)[5:12]),function(c){plot(1,1,axes=F,type="n");text(1,1,c)})
+        sapply(unique(res$type),function(t){plot(1,1,axes=F,type="n");text(1,1,paste(t,"\nN=",nrow(res[res$type==t,])));sapply(5:12,function(c)mydensity(res[res$type==t,c]))})
+        #dev.off()
+    }
+
+    mydensity <- function(vec){
+        plot(density(vec),main="",xlab="cm",ylab="",cex=.8,axes=F)
+        axis(1,cex.axis=.7,mgp=c(.3,.1,0),tck=-.02)
+        cur=par()
+        #text((cur$usr[1]+cur$usr[2])/2,(cur$usr[3]+cur$usr[4])/2,paste("N=",length(vec)))
+    }
+
+
+    tableoftest <- function(){
+        library(xtable)
+        library(mvn) ##mvn is awesome. But huge
+        testlist=lapply(unique(res$type), function(a){ cbind(mvn(res[ res$type == a ,5:12])[["univariateNormality"]],type=a)})
+        tabletest=do.call(rbind.data.frame, testlist)
+        print(xtable(tabletest),include.rownames=F,file="../doc/univariate.tex")
+        testlist=lapply(unique(res$type), function(a){ cbind(mvn(res[ res$type == a ,5:12])[["multivariateNormality"]],type=a)})
+        tabletest=do.call(rbind.data.frame, testlist)
+        print(xtable(tabletest),include.rownames=F,file="../doc/multivariate.tex")
+
+    }
