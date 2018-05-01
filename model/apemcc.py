@@ -137,10 +137,8 @@ class CCSimu(object):
                 if( ws.id != ws2.id and random.random() < self.p_copy):  #with a 1/100 proba we initialize a copy
                     if(self.init=="file"):
                         dist=self.world_dist[ws2.id+ws.id] #get the distance between two given workshop
-                        print("abs: "+str(dist))
                         if(relative):
                             dist=self.getrelativedist(dist)
-                        print(dist)
                     elif self.init == "art":
                         dist=ws2.dist-ws.dist
                     r=random.random()
