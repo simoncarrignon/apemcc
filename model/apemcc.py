@@ -36,11 +36,11 @@ class CCSimu(object):
     #Some usual default parameters:
     #p_mu=.001 ##mutation probability 1 other 1000 .1 percent
     #p_copy=.01 ##probability of copy
-    #d_weight=1 #weight of the distance 
+    #b_dist=1 #weight of the distance 
 
     p_mu=.001
     p_copy=.01
-    d_weight=1
+    b_dist=-1 #bias toward distance: when b_dist == -1 <=> no bias <=> transmission depends only of p_copy (horizontal transmission).  b_dist == 1 <=> ultra biased <=> even small distance make  copy 
     world=list()
     world_list=dict()
     world_lim=list()
@@ -48,14 +48,14 @@ class CCSimu(object):
     init=""
     rate_depo=1000 #the rate at wish workshop will write their deposit in the outputfile
 
-    def __init__(self,n_ws,max_time,pref,model,p_mu,p_copy,d_weight,init):
+    def __init__(self,n_ws,max_time,pref,model,p_mu,p_copy,b_dist,init):
         self.n_ws=n_ws
         self.max_time=max_time
         self.pref=pref #us eto classify differetn type of simulation
         self.model=model
         self.p_mu=p_mu
         self.p_copy=p_copy
-        self.d_weight=d_weight
+        self.b_dist=b_dist
         self.init=init
 
         print 'Initialization of the world' 
@@ -117,8 +117,18 @@ class CCSimu(object):
         header = "time,workshop,dist,amphora,exterior_diam,protruding_rim,rim_w,rim_w_2\n"
         self.prodfile.write(header)
 
+    #given a absolute distance, return a relative distance
     def getrelativedist(self,dis):
         return((float(dis)-(self.mindist))/((self.maxdist)-(self.mindist)))
+
+    #strenght of the bias toward distance.
+    def beta_d(self,dist):
+        #if(self.b_dist> 0):
+        #    return( -pow(d,100 ** self.b_dist))
+        #else: #(self.b_dist=< 0):
+        #    return( -(1-pow(d,100 ** self.b_dist)))
+        return(1-pow(dist,100 ** self.b_dist))
+        
 
 
     def run(self): ##main function of the class Experiment => run a simulation
@@ -143,13 +153,14 @@ class CCSimu(object):
                         print(dist)
                     elif self.init == "art":
                         dist=ws2.dist-ws.dist
-                    r=random.random()
-                    if(  self.model == "HT"):
-                        proba= 1   #no effect of distance between the workshop ie everybody copy everybody with same proba of 1/100
-                    elif self.model== "HTD":
-                        proba= dist < random.random()*self.d_weight  #should be true when two workshop are close to eachother
-                    elif self.model == "VT": 
-                        proba= 0
+                    biased_dist=self.beta_d(dist)
+                    proba = random.random() < biased_dist #proba = 1/biased_dist
+                    #if(  self.model == "HT"):
+                    #    proba= 1   #no effect of distance between the workshop ie everybody copy everybody with same proba of 1/100
+                    #elif self.model== "HTD":
+                    #    proba= dist < random.random()*self.b_dist  #should be true when two workshop are close to eachother
+                    #elif self.model == "VT": 
+                    #    proba= 0
 
                     if proba:
                         ws.copy(ws2)  
