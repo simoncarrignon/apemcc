@@ -135,7 +135,7 @@ class CCSimu(object):
 
         relative=True
 ##begining of the simulation
-        print("starting the simulation with copy mechanism: "+str(self.model))
+        print("starting the simulation with copy mechanism: "+str(self.model)+" and b_dist="+str(self.b_dist))
         for t in range(0,self.max_time,1):  
             for ws in self.world :
                 if( t%self.rate_depo ==0): 
@@ -152,7 +152,7 @@ class CCSimu(object):
                     elif self.init == "art":
                         dist=ws2.dist-ws.dist
                     biased_dist=self.beta_d(dist)
-                    proba = random.random() < biased_dist #proba = 1/biased_dist
+                    proba = random.random() < (1-biased_dist) #proba = 1/biased_dist
                     #if(  self.model == "HT"):
                     #    proba= 1   #no effect of distance between the workshop ie everybody copy everybody with same proba of 1/100
                     #elif self.model== "HTD":
