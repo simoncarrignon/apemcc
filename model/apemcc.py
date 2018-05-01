@@ -3,10 +3,10 @@
 #A simple evolutionary model to study the evolution of workshop amphora production
 #
 
-import sys, getopt
 import random 
 import math
 import csv
+from Workshop import Workshop #import the agent class
 
 #distances between workshops created by google maps
 #"parlamento","belen",72.45
@@ -27,89 +27,17 @@ import csv
 #"villaseca","parlamento",95.33
 
 #Definition of the Agent which are workshop in our case:
-class Workshop(object):
-    dist=0
-    id=""
-    all_measures={}
-    prod_rate=-1
-    mutation_power=.05
-    world_lim={}
-
-    #This function allow us to create a new workshop 
-    def __init__(self, id, dist,all_measures,prod_rate,world_lim):
-        self.all_measures=all_measures
-        self.world_lim=world_lim
-        self.id=id
-        self.prod_rate=prod_rate
-        self.dist=dist
-        print('New workshop called '+self.id+" at : "+str(self.dist)+" km")
-
-    #fonction to use  str() in order to print a workshop as a string (in this case doesnt work with this code)
-    #def __str__(self):
-        #return('Workshop '+self.id+" at distance: "+str(self.dist)+"\n\t they produce amphora with exterior_diam mean="+str(self.all_measures["exterior_diam"]["mean"])+", sd="+str(self.all_measures["exterior_diam"]["sd"]))
-    
-    #produce: show a production of amphora given the parameter of the function measure we use (in this case doesnt work with this code)
-    #def produce(self,amount):
-        #for i in range(1,amount,1):
-            #amphsize= random.gauss(self.all_measures["exterior_diam"]["mean"],self.all_measures["exterior_diam"]["sd"])
-
-    #writeProduce: write in a file the amphora produced given the parameter of the workshop 
-    #if amount>0 it will limit the number of amphora written in the output file (
-    def writeProduction(self,t,res_file,amount=0):
-        if amount == 0:
-            amount=self.prod_rate
-
-        for i in range(1,amount,1):
-            amph=str(t)+","+self.id+","+str(self.dist)+",amphora_"+ str(i)
-            for measure in self.all_measures:
-                param=self.all_measures[measure]
-                val=random.gauss(param["mean"],param["sd"])
-                amph=amph+","+str(val)
-            res_file.write(amph+"\n")
-
-
-    #mutate: randomly change the parameter of production
-    def mutate(self):
-        for measure in self.all_measures:
-            up=-1 #increase or decrease the value
-            if(random.randint(0,1)):up=1 #randomly  increase or decrease the size
-            self.all_measures[measure]["mean"] = self.all_measures[measure]["mean"] + self.all_measures[measure]["mean"]* self.mutation_power  *up
-            while self.all_measures[measure]["mean"] > (self.world_lim[measure]["max"]*1.1) or self.all_measures[measure]["mean"] < (self.world_lim[measure]["min"]*.9):
-                if self.all_measures[measure]["mean"] > (self.world_lim[measure]["max"]*1.1):
-                    up=-1
-                else :
-                    up = 1 
-                self.all_measures[measure]["mean"] = self.all_measures[measure]["mean"] + self.all_measures[measure]["mean"]* self.mutation_power  *up
-            #self.all_measures[measure]["sd"] = self.all_measures[measure]["sd"]+  self.all_measures[measure]["sd"]*self.mutation_power*.01 *up # + random.random()*self.all_measures["exterior_diam"]["sd"]-self.all_measures["exterior_diam"]["sd"]
-
-    def copy(self,ws2):
-        for measure in self.all_measures:
-            up=-1
-            if(random.randint(0,1)):up=1
-            self.all_measures[measure]["mean"] = ws2.all_measures[measure]["mean"] #+  self.all_measures[measure]["mean"]*self.mutation_power  *up
-            self.all_measures[measure]["sd"] = ws2.all_measures[measure]["sd"]
-            #while self.all_measures[measure]["mean"] > self.world_lim[measure]["max"] or self.all_measures[measure]["mean"] < self.world_lim[measure]["min"]:
-            #    if self.all_measures[measure]["mean"] > self.world_lim[measure]["max"]:
-            #        up=-1
-            #    else :
-            #        up = 1 
-            #    self.all_measures[measure]["mean"] = self.all_measures[measure]["mean"] + self.all_measures[measure]["mean"]* self.mutation_power  *up
-            #self.all_measures[measure]["sd"] = ws2.all_measures[measure]["sd"]+  self.all_measures[measure]["sd"]*.0001 *up # + random.random()*self.all_measures["exterior_diam"]["sd"]-self.all_measures["exterior_diam"]["sd"]
-
-    #def dist(self,ws2):
-    #    return(mat_dist[self.id,ws2.id])
-    ##self.all_measures["exterior_diam"]["sd"] = ws2.all_measures["exterior_diam"]["sd"] + random.random()*self.all_measures["exterior_diam"]["sd"]-self.all_measures["exterior_diam"]["sd"]
-#########################
-#########################
-#########################
-#########################
-
-#Definition of the Agent which are workshop in our case:
-class Experience(object):
-    n_ws=5 ##if no number of workshop given we us 5
+class CCSimu(object):
+    n_ws=-1 ##if no number of workshop given we us 5
     max_time= 10000
     outfile= "output"
     model= "VT"
+
+    #Some usual default parameters:
+    #p_mu=.001 ##mutation probability 1 other 1000 .1 percent
+    #p_copy=.01 ##probability of copy
+    #d_weight=1 #weight of the distance 
+
     p_mu=.001
     p_copy=.01
     d_weight=1
@@ -118,6 +46,7 @@ class Experience(object):
     world_lim=list()
     prodfile=""
     init=""
+    rate_depo=1000 #the rate at wish workshop will write their deposit in the outputfile
 
     def __init__(self,n_ws,max_time,pref,model,p_mu,p_copy,d_weight,init):
         self.n_ws=n_ws
@@ -129,36 +58,25 @@ class Experience(object):
         self.d_weight=d_weight
         self.init=init
 
-##Definition of the main function
-#########################
-##TODO: allow to easily switch from workshop in a file vs workshop created onthefly
-
-    #p_mu=.001 ##mutation probability 1 other 1000 .1 percent
-    #p_copy=.01 ##probability of copy
-    #d_weight=1 #weight of the distance
         print 'Initialization of the world' 
         print str(self.n_ws), 'Workshop' 
         print 'During ', str(self.max_time), 'iterations' 
 
         self.world = list() #initialisation of the world
         self.world_dist=dict() #dictionnaire to store the distance of the cities two by two
-        outfilename=self.pref+"_"+"N"+str(self.n_ws)+".csv"
-        self.prodfile = open(outfilename, "w")
-        header = "time,workshop,dist,amphora,exterior_diam,protruding_rim,rim_w,rim_w_2\n"
-        self.prodfile.write(header)
+
         pn=5
 
         self.world_lim={"exterior_diam":{"min":130,"max":200},"protruding_rim":{"min":5,"max":40}, "rim_w":{"min":25,"max": 48}, "rim_w_2":{"min": 15,"max": 44}}
         if self.init=="file":
+            print("initialize the workshop using the file 'data/distmetrics.csv'")
+            print("warning:argument"+" number of workshop"+" will be ignored")
             with open('data/distmetrics.csv','rb') as distfile:
                   distances = csv.reader(distfile, delimiter=',')
                   for row in distances:
                       self.world_dist[row[0]+row[1]]=float(row[2]) #print(row)
                       self.world_dist[row[1]+row[0]]=float(row[2]) #print(row)
                   #worldlist[distances[1]] = {distances[2],distances[3]}
-        
-            #forloop to create the wanted number of workshop an position them at equal distance
-            #Should be used only in the theoretical case (as presented in Birmingham 2016)
 
 
                   #(1) mean of mean btw ws (2)sd of mean btw ws (3)min (4)max
@@ -171,18 +89,21 @@ class Experience(object):
                   #rim_inside_h             28.373472         1.1329995  20  39
                   #rim_w_2                  31.054947         1.2328019  15  44
                   #protruding_rim           18.273888         3.2735080   5  40
- #exteri    or_diam    inside_diam          rim_h          rim_w        shape_w  rim_inside_h        rim_w_2 protruding_rim
- #     1    1.126504       9.250002       3.004174       3.494843       1.080722       2.976005       4.216725       4.790658
+                 #exteri    or_diam    inside_diam          rim_h          rim_w        shape_w  rim_inside_h        rim_w_2 protruding_rim
+                 #     1    1.126504       9.250002       3.004174       3.494843       1.080722       2.976005       4.216725       4.790658
             #the mean standard deviation for every measurment
-            
-
-
+            self.maxdist=max(self.world_dist.values())
+            self.mindist=min(self.world_dist.values())
+             
             for ws in  {"villaseca","belen","malpica","delicias","parlamento"}:
                 dist=10 #this is not use in that case as the "distance" are given by the dictionnary world_dict
                 new_ws= Workshop(ws,dist,{"exterior_diam":{"mean":167.90,"sd":11},"protruding_rim":{"mean":18.30,"sd":5}, "rim_w":{"mean":37.23,"sd": 2.5}, "rim_w_2":{"mean": 31.24,"sd": 4}},100,self.world_lim)
                 self.world.append(new_ws)
+            self.n_ws=len(self.world)
+
         elif self.init=="art":
-            for ws in range(0,n_ws,1):
+            print("initialize"+str(self.n_ws)+" workshop randomly")
+            for ws in range(self.n_ws):
                 dist=ws
                 #if(ws > 3):
                 #    dist=ws+3
@@ -191,33 +112,43 @@ class Experience(object):
                 new_ws= Workshop('ws_'+str(ws),dist,{"exterior_diam":{"mean":167.7+ws,"sd":12.26},"protruding_rim":{"mean":19+ws,"sd":5.6}},10,self.world_lim)
                 self.world.append(new_ws)
 
+        outfilename=self.pref+"_"+"N"+str(self.n_ws)+".csv"
+        self.prodfile = open(outfilename, "w")
+        header = "time,workshop,dist,amphora,exterior_diam,protruding_rim,rim_w,rim_w_2\n"
+        self.prodfile.write(header)
+
+    def getrelativedist(self,dis):
+        return((float(dis)-(self.mindist))/((self.maxdist)-(self.mindist)))
 
 
-    def run(self): ##main fyunction of the class Experiment => run a simulation
+    def run(self): ##main function of the class Experiment => run a simulation
 
+        relative=True
 ##begining of the simulation
-        print "starting the simulation with copy mechanism:",model
-        for t in range(0,max_time,1):  
+        print("starting the simulation with copy mechanism: "+str(self.model))
+        for t in range(0,self.max_time,1):  
             for ws in self.world :
-                if( t%10000 ==0): 
+                if( t%self.rate_depo ==0): 
                     ws.writeProduction(t,self.prodfile)
-                    #print "timestep:", str(t)
-                if( random.random()< p_mu):
+                if( random.random()< self.p_mu):
                     ws.mutate()
-                n=random.randint(0,(n_ws-1))
+                n=random.randint(0,(self.n_ws-1))
                 ws2 = self.world[n]
                 if( ws.id != ws2.id and random.random() < self.p_copy):  #with a 1/100 proba we initialize a copy
                     if(self.init=="file"):
-                        rel_dist=self.world_dist[ws2.id+ws.id] #get the distance between two given workshop
-                        rel_dist=((float(rel_dist)-(8.13))/((95.33)-(8.13)))
+                        dist=self.world_dist[ws2.id+ws.id] #get the distance between two given workshop
+                        print("abs: "+str(dist))
+                        if(relative):
+                            dist=self.getrelativedist(dist)
+                        print(dist)
                     elif self.init == "art":
-                        rel_dist=ws2.dist-ws.dist
+                        dist=ws2.dist-ws.dist
                     r=random.random()
-                    if(  model == "HT"):
+                    if(  self.model == "HT"):
                         proba= 1   #no effect of distance between the workshop ie everybody copy everybody with same proba of 1/100
-                    elif model== "HTD":
-                        proba= rel_dist < random.random()*self.d_weight  #should be true when two workshop are close to eachother
-                    elif model == "VT": 
+                    elif self.model== "HTD":
+                        proba= dist < random.random()*self.d_weight  #should be true when two workshop are close to eachother
+                    elif self.model == "VT": 
                         proba= 0
 
                     if proba:
@@ -226,44 +157,3 @@ class Experience(object):
 
 
 
-if __name__ == "__main__":
-    argv=sys.argv[1:]
-
-    #initialisation of the variable used during the simulation
-    ntws = 0   
-    max_time = 0
-    outfile = "default"
-
-###Folling lines using to parse the arguments from the command line
-    use='apemcc.py -w <number of Workshop> -t <time> -f <outputfile> -m <model> -i <init>\n `time` is the total number of time step of the simulation \n `init` should be in {"art","file"}\n `model` should be in {"HT","HTD","VT"}\n `outputfile` wille be use to write and store the results of the model'
-
-    try:
-        opts, args = getopt.getopt(argv,"hw:t:f:m:i:",)
-    except getopt.GetoptError:
-        print use
-        sys.exit(2)
-    if len(opts) < 1:
-        print use
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == '-h':
-            print use
-            sys.exit()
-        elif opt == "-w":
-           n_ws = int(arg)
-        elif opt == "-t":
-           max_time = int(arg)
-        elif opt == "-f":
-           outfile = str(arg)
-        elif opt == "-m":
-           model = str(arg)
-        elif opt == "-i":
-           init = str(arg)
-           
-    p_mu=.001 ##mutation probability 1 other 1000 .1 percent
-    p_copy=.01 ##probability of copy
-    d_weight=.7 #weight of the distance
-
-    main_exp=Experience(n_ws,max_time,outfile,model,p_mu,p_copy,d_weight,init)
-
-    main_exp.run()

@@ -4,3 +4,7 @@
 *.pdf
 *.sw?
 */log_*
+*.pyc
+*.aux
+*.log
+*.pdf
