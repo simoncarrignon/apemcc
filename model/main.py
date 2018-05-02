@@ -10,7 +10,7 @@ if __name__ == "__main__":
     outfile = "default"
 
 ###Folling lines using to parse the arguments from the command line
-    use='apemcc.py -w <number of Workshop> -t <time> -f <outputfile> -i <init> -a <alpha> [-m <model>] \n `time` is the total number of time step of the simulation \n `init` should be in {"art","file"}\n `model` (for compatibility) should be in {"HT","HTD","VT"}\n `outputfile` will be used to write and store the results of the model' \n `
+    use='apemcc.py -w <number of Workshop> -t <time> -f <outputfile> -i <init> -a <alpha> [-m <model>] \n `time` is the total number of time step of the simulation \n `init` should be in {"art","file"}\n `model` (for compatibility) should be in {"HT","HTD","VT"}\n `outputfile` will be used to write and store the results of the model \n `alpha` the famous alpha'
 
     try:
         opts, args = getopt.getopt(argv,"hw:t:f:a:i:m:",)
