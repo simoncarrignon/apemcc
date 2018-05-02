@@ -28,10 +28,13 @@ from Workshop import Workshop #import the agent class
 
 #Definition of the Agent which are workshop in our case:
 class CCSimu(object):
+    realmeans=    {"belen":171.181818181818,"delicias":172.084033613445,"malpica":166.054054054054,"parlamento":163.809523809524,"villaseca":160.207547169811}
+    #"sd",12.3795766686627,8.5207422211249,9.83854926282588,11.6498468434151,13.2438062309636
+
     n_ws=-1 ##if no number of workshop given we us 5
     max_time= 10000
     outfile= "output"
-    model= "VT"
+    model= -1
 
     #Some usual default parameters:
     #p_mu=.001 ##mutation probability 1 other 1000 .1 percent
@@ -105,12 +108,11 @@ class CCSimu(object):
             print("initialize"+str(self.n_ws)+" workshop randomly")
             for ws in range(self.n_ws):
                 dist=ws
-                #if(ws > 3):
-                #    dist=ws+3
-                #if ws > 6:
-                #    dist=ws+9
                 new_ws= Workshop('ws_'+str(ws),dist,{"exterior_diam":{"mean":167.7+ws,"sd":12.26},"protruding_rim":{"mean":19+ws,"sd":5.6}},10,self.world_lim)
                 self.world.append(new_ws)
+            self.maxdist=self.n_ws
+            self.mindist=0
+                
 
         outfilename=self.pref+"_"+"N"+str(self.n_ws)+".csv"
         self.prodfile = open(outfilename, "w")
@@ -127,8 +129,16 @@ class CCSimu(object):
         #    return( -pow(d,100 ** self.b_dist))
         #else: #(self.b_dist=< 0):
         #    return( -(1-pow(d,100 ** self.b_dist)))
-        return(1-pow(dist,100 ** self.b_dist))
-        
+        return(1-pow(1-dist,100 ** self.b_dist))
+                
+    ##proxi to setup copy using 3 different bias
+    def threemod(self,dist):
+        if(  self.model == "HT"):
+            proba= 1   #no effect of distance between the workshop ie everybody copy everybody with same proba of 1/100
+        elif self.model== "HTD":
+            proba= dist < random.random()*self.b_dist  #should be true when two workshop are close to eachother
+        elif self.model == "VT": 
+            proba= 0
 
 
     def run(self): ##main function of the class Experiment => run a simulation
@@ -144,21 +154,19 @@ class CCSimu(object):
                     ws.mutate()
                 n=random.randint(0,(self.n_ws-1))
                 ws2 = self.world[n]
-                if( ws.id != ws2.id and random.random() < self.p_copy):  #with a 1/100 proba we initialize a copy
+                if( ws.id != ws2.id and random.random() < self.p_copy):  #with a proba == self.p_copy we initialize a copy
                     if(self.init=="file"):
                         dist=self.world_dist[ws2.id+ws.id] #get the distance between two given workshop
-                        if(relative):
-                            dist=self.getrelativedist(dist)
                     elif self.init == "art":
                         dist=ws2.dist-ws.dist
-                    biased_dist=self.beta_d(dist)
-                    proba = random.random() < (1-biased_dist) #proba = 1/biased_dist
-                    #if(  self.model == "HT"):
-                    #    proba= 1   #no effect of distance between the workshop ie everybody copy everybody with same proba of 1/100
-                    #elif self.model== "HTD":
-                    #    proba= dist < random.random()*self.b_dist  #should be true when two workshop are close to eachother
-                    #elif self.model == "VT": 
-                    #    proba= 0
+                    if(relative):
+                        dist=self.getrelativedist(dist)
+                    proba=0
+                    if(self.model != -1):
+                        proba =  self.threemod(dist)
+                    else:
+                        biased_dist=self.beta_d(dist)
+                        proba = random.random() < (1-biased_dist) #proba = 1/biased_dist
 
                     if proba:
                         ws.copy(ws2)  
