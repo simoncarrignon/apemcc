@@ -25,10 +25,10 @@ from Workshop import Workshop #import the agent class
 #"villaseca","malpica",20.97
 #"villaseca","delicias",22.45
 #"villaseca","parlamento",95.33
+realmeans=    {"belen":171.181818181818,"delicias":172.084033613445,"malpica":166.054054054054,"parlamento":163.809523809524,"villaseca":160.207547169811}
 
 #Definition of the Agent which are workshop in our case:
 class CCSimu(object):
-    realmeans=    {"belen":171.181818181818,"delicias":172.084033613445,"malpica":166.054054054054,"parlamento":163.809523809524,"villaseca":160.207547169811}
     #"sd",12.3795766686627,8.5207422211249,9.83854926282588,11.6498468434151,13.2438062309636
 
     n_ws=-1 ##if no number of workshop given we us 5
@@ -67,8 +67,6 @@ class CCSimu(object):
 
         self.world = list() #initialisation of the world
         self.world_dist=dict() #dictionnaire to store the distance of the cities two by two
-
-        pn=5
 
         self.world_lim={"exterior_diam":{"min":130,"max":200},"protruding_rim":{"min":5,"max":40}, "rim_w":{"min":25,"max": 48}, "rim_w_2":{"min": 15,"max": 44}}
         if self.init=="file":
@@ -149,7 +147,7 @@ class CCSimu(object):
         for t in range(0,self.max_time,1):  
             for ws in self.world :
                 if( t%self.rate_depo ==0): 
-                    ws.writeProduction(t,self.prodfile)
+                    ws.produce(t,self.prodfile)
                 if( random.random()< self.p_mu):
                     ws.mutate()
                 n=random.randint(0,(self.n_ws-1))

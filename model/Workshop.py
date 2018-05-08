@@ -8,14 +8,18 @@ class Workshop(object):
     prod_rate=-1
     mutation_power=.05
     world_lim={}
+    production={}
 
     #This function allow us to create a new workshop 
     def __init__(self, id, dist,all_measures,prod_rate,world_lim):
         self.all_measures=all_measures
         self.world_lim=world_lim
         self.id=id
+        self.production=dict()
         self.prod_rate=prod_rate
         self.dist=dist
+        for measure in all_measures:
+            self.production[measure]=list()
         print('New workshop called '+self.id+" at : "+str(self.dist)+" km")
 
     #fonction to use  str() in order to print a workshop as a string (in this case doesnt work with this code)
@@ -29,17 +33,20 @@ class Workshop(object):
 
     #writeProduce: write in a file the amphora produced given the parameter of the workshop 
     #if amount>0 it will limit the number of amphora written in the output file (
-    def writeProduction(self,t,res_file,amount=0):
+    def produce(self,t,res_file,amount=0):
         if amount == 0:
             amount=self.prod_rate
-
-        for i in range(1,amount,1):
-            amph=str(t)+","+self.id+","+str(self.dist)+",amphora_"+ str(i)
+        for i in range(amount):
+            if(res_file!=""):
+                amph=str(t)+","+self.id+","+str(self.dist)+",amphora_"+ str(i)
             for measure in self.all_measures:
                 param=self.all_measures[measure]
                 val=random.gauss(param["mean"],param["sd"])
-                amph=amph+","+str(val)
-            res_file.write(amph+"\n")
+                self.production[measure].append(val)
+                if(res_file!=""):
+                    amph=amph+","+str(val)
+            if(res_file!=""):
+                res_file.write(amph+"\n")
 
 
     #mutate: randomly change the parameter of production
