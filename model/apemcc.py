@@ -27,6 +27,22 @@ from Workshop import Workshop #import the agent class
 #"villaseca","parlamento",95.33
 realmeans=    {"belen":171.181818181818,"delicias":172.084033613445,"malpica":166.054054054054,"parlamento":163.809523809524,"villaseca":160.207547169811}
 
+
+def getrealdist():
+    print("load workshop distiance using the file 'data/distmetrics.csv'")
+    realdist={}
+    with open('data/distmetrics.csv','rb') as distfile:
+          distances = csv.reader(distfile, delimiter=',')
+          for row in distances:
+              realdist[row[0]+row[1]]=float(row[2]) #print(row)
+              realdist[row[1]+row[0]]=float(row[2]) #print(row)
+          #worldlist[distances[1]] = {distances[2],distances[3]}
+    distfile.close()
+    return(realdist)
+
+realdist=getrealdist()
+
+
 #Definition of the Agent which are workshop in our case:
 class CCSimu(object):
     #"sd",12.3795766686627,8.5207422211249,9.83854926282588,11.6498468434151,13.2438062309636
@@ -51,7 +67,7 @@ class CCSimu(object):
     init=""
     rate_depo=1000 #the rate at wish workshop will write their deposit in the outputfile
 
-    def __init__(self,n_ws,max_time,pref,model,p_mu,p_copy,b_dist,init):
+    def __init__(self,n_ws,max_time,pref,model,p_mu,p_copy,b_dist,init,dist_list={},outputfile=True):
         self.n_ws=n_ws
         self.max_time=max_time
         self.pref=pref #us eto classify differetn type of simulation
@@ -60,38 +76,41 @@ class CCSimu(object):
         self.p_copy=p_copy
         self.b_dist=b_dist
         self.init=init
+        self.ouputfile=outputfile
 
-        print 'Initialization of the world' 
-        print str(self.n_ws), 'Workshop' 
-        print 'During ', str(self.max_time), 'iterations' 
+        print('Initialization of the world')
 
         self.world = list() #initialisation of the world
         self.world_dist=dict() #dictionnaire to store the distance of the cities two by two
 
         self.world_lim={"exterior_diam":{"min":130,"max":200},"protruding_rim":{"min":5,"max":40}, "rim_w":{"min":25,"max": 48}, "rim_w_2":{"min": 15,"max": 44}}
         if self.init=="file":
-            print("initialize the workshop using the file 'data/distmetrics.csv'")
-            print("warning:argument"+" number of workshop"+" will be ignored")
-            with open('data/distmetrics.csv','rb') as distfile:
-                  distances = csv.reader(distfile, delimiter=',')
-                  for row in distances:
-                      self.world_dist[row[0]+row[1]]=float(row[2]) #print(row)
-                      self.world_dist[row[1]+row[0]]=float(row[2]) #print(row)
-                  #worldlist[distances[1]] = {distances[2],distances[3]}
+            if(len(dist_list) >0):
+                self.world_dist = dist_list
+            else:
+                print("initialize the workshop using the file 'data/distmetrics.csv'")
+                print("warning:argument"+" number of workshop"+" will be ignored")
+                with open('data/distmetrics.csv','rb') as distfile:
+                      distances = csv.reader(distfile, delimiter=',')
+                      for row in distances:
+                          self.world_dist[row[0]+row[1]]=float(row[2]) #print(row)
+                          self.world_dist[row[1]+row[0]]=float(row[2]) #print(row)
+                      #worldlist[distances[1]] = {distances[2],distances[3]}
+                distfile.close()
+                print(distfile)
 
-
-                  #(1) mean of mean btw ws (2)sd of mean btw ws (3)min (4)max
-                  #measurement:             (1)                 (2)     (3) (4)
-                  #exterior_diam           166.667395         4.9998310 130 200
-                  #inside_diam              93.631245         1.3069177  70 140
-                  #rim_h                    35.387083         0.8810068  25  48
-                  #rim_w                    36.686752         1.9171952  25  48
-                  #shape_w                   9.646956         0.6530906   5  14
-                  #rim_inside_h             28.373472         1.1329995  20  39
-                  #rim_w_2                  31.054947         1.2328019  15  44
-                  #protruding_rim           18.273888         3.2735080   5  40
-                 #exteri    or_diam    inside_diam          rim_h          rim_w        shape_w  rim_inside_h        rim_w_2 protruding_rim
-                 #     1    1.126504       9.250002       3.004174       3.494843       1.080722       2.976005       4.216725       4.790658
+              #(1) mean of mean btw ws (2)sd of mean btw ws (3)min (4)max
+              #measurement:             (1)                 (2)     (3) (4)
+              #exterior_diam           166.667395         4.9998310 130 200
+              #inside_diam              93.631245         1.3069177  70 140
+              #rim_h                    35.387083         0.8810068  25  48
+              #rim_w                    36.686752         1.9171952  25  48
+              #shape_w                   9.646956         0.6530906   5  14
+              #rim_inside_h             28.373472         1.1329995  20  39
+              #rim_w_2                  31.054947         1.2328019  15  44
+              #protruding_rim           18.273888         3.2735080   5  40
+             #exteri    or_diam    inside_diam          rim_h          rim_w        shape_w  rim_inside_h        rim_w_2 protruding_rim
+             #     1    1.126504       9.250002       3.004174       3.494843       1.080722       2.976005       4.216725       4.790658
             #the mean standard deviation for every measurment
             self.maxdist=max(self.world_dist.values())
             self.mindist=min(self.world_dist.values())
@@ -112,10 +131,13 @@ class CCSimu(object):
             self.mindist=0
                 
 
-        outfilename=self.pref+"_"+"N"+str(self.n_ws)+".csv"
-        self.prodfile = open(outfilename, "w")
-        header = "time,workshop,dist,amphora,exterior_diam,protruding_rim,rim_w,rim_w_2\n"
-        self.prodfile.write(header)
+        if(self.ouputfile):
+            outfilename=self.pref+"_"+"N"+str(self.n_ws)+".csv"
+            self.prodfile = open(outfilename, "w")
+            header = "time,workshop,dist,amphora,exterior_diam,protruding_rim,rim_w,rim_w_2\n"
+            self.prodfile.write(header)
+        else:
+            self.prodfile=""
 
     #given a absolute distance, return a relative distance
     def getrelativedist(self,dis):
@@ -168,7 +190,10 @@ class CCSimu(object):
 
                     if proba:
                         ws.copy(ws2)  
-        print "simulation done."
+        if(self.prodfile!=""):
+            self.prodfile.close()
+
+        print("simulation done.")
 
 
 
