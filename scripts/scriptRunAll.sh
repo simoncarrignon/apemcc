@@ -2,6 +2,7 @@
 time=30001
 exp=$1
 mkdir $exp
+echo "" > logsimulatsions
 for m in "HT" "VT" "HTD";
 do
 	echo "Running simulation for model $m"
@@ -16,14 +17,15 @@ do
         if [ $m == "VT" ]
         then
 
-            a=-0.5
+            a=1
         fi
         if [ $m == "HTD" ]
         then
 
-            a=0
+            a=.5
         fi
         echo $a
-        python model/main.py -i file -w 5 -t $time -f "$exp"/"$m"/"$m"_"$i" -m "$m" -a "$a"; 
+        echo $m
+        python model/main.py -i file -w 5 -t $time -f "$exp"/"$m"/"$m"_"$i" -m -1  -a "$a" >> logsimulatsions
     done ; 
 done
