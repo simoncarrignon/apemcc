@@ -4,6 +4,8 @@ d=seq(0,1,.001) #fake distance between 0 and oin
 betaN <- function(d,alpha)((if(alpha>1)d^(100^alpha) else (1-(1-d)^(100^alpha))))
 beta <- function(d,alpha)((1-(1-d)^(100^alpha))) #the last beta
 
+betaB<- function(d,alpha)((d)^(100^alpha)) #the last beta
+
 alphas=exp(seq(0,5,0.01))-5
 alphas=c(10^(2*erf(seq(-1,1,length.out=100))))
 alphas=c(10^(10*seq(-1,1,length.out=100)^3))
@@ -15,8 +17,13 @@ clrs=terrain.colors(length(alphas))
 names(clrs)=alphas
 plot(1,1,xlim=c(0,1),ylim=c(0,1),type="n",xlab="distance")
 sapply(alphas,function(a)lines(d,betaN(d,-a),lwd=2,col=clrs[as.character(a)]))
+par(mfrow=c(1,2))
 plot(1,1,xlim=c(0,1),ylim=c(0,1),type="n",xlab=expression(d),ylab=expression(beta(d,alpha)))
 sapply(alphas,function(a)lines(d,beta(d,a),lwd=2,col=clrs[as.character(a)]))
+plot(1,1,xlim=c(0,1),ylim=c(0,1),type="n",xlab=expression(d),ylab=expression(betaB(d,-alpha)))
+sapply(alphas,function(a)lines(d,betaB(d,-a),lwd=2,col=clrs[as.character(a)]))
+
+sapply(alphas,function(a)lines(d,beta(d,a)-betaB(d,-a),lwd=2,col=clrs[as.character(a)]))
 plot(d,beta(d,1),type="l",ylim=c(0,1))
 plot(x,erf(x))
 x=seq(-1,1,length.out=100)
