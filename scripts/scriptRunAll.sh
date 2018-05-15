@@ -26,6 +26,6 @@ do
         fi
         echo $a
         echo $m
-        python model/main.py -i file -w 5 -t $time -f "$exp"/"$m"/"$m"_"$i" -m -1  -a "$a" >> logsimulatsions
+        python main.py -i file -w 5 -t $time -f "$exp"/"$m"/"$m"_"$i" -m -1  -a "$a" >> logsimulatsions
     done ; 
 done
