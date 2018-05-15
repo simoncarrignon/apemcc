@@ -29,6 +29,7 @@ from Workshop import Workshop #import the agent class
 realmeans= {"belen":171.181818181818,"delicias":172.084033613445,"malpica":166.054054054054,"parlamento":163.809523809524,"villaseca":160.207547169811}
 
 realsd={"exterior_diam":11,"protruding_rim":5, "rim_w":2.5, "rim_w_2":4}
+realsd={"exterior_diam":.05,"protruding_rim":.05, "rim_w":.05, "rim_w_2":0.05}
 
 
 def getrealdist():
@@ -82,6 +83,7 @@ class CCSimu(object):
         self.b_dist=b_dist
         self.init=init
         self.ouputfile=outputfile
+        #if(len(mu_str) < 1) self.mu_str={
 
         print('Initialization of the world')
 
@@ -158,12 +160,14 @@ class CCSimu(object):
                 
     ##proxi to setup copy using 3 different bias
     def threemod(self,dist):
+        proba=0
         if(  self.model == "HT"):
             proba= 1   #no effect of distance between the workshop ie everybody copy everybody with same proba of 1/100
         elif self.model== "HTD":
             proba= dist < random.random()*self.b_dist  #should be true when two workshop are close to eachother
         elif self.model == "VT": 
             proba= 0
+        return(proba)
 
 
     def run(self): ##main function of the class Experiment => run a simulation
@@ -187,7 +191,8 @@ class CCSimu(object):
                     if(relative):
                         dist=self.getrelativedist(dist)
                     proba=0
-                    if(self.model != -1):
+                    if(str(self.model) != "-1"):
+                        self.b_dist=.7
                         proba =  self.threemod(dist)
                     else:
                         biased_dist=self.beta_d(dist)
