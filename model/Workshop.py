@@ -74,21 +74,26 @@ class Workshop(object):
                     new = self.all_measures[measure]["mean"] +  mu_str[measure]*up
                 self.all_measures[measure]["mean"]=new
 
-            #self.all_measures[measure]["sd"] = self.all_measures[measure]["sd"]+  self.all_measures[measure]["sd"]*self.mutation_power*.01 *up # + random.random()*self.all_measures["exterior_diam"]["sd"]-self.all_measures["exterior_diam"]["sd"]
-
     def copy(self,ws2):
-        for measure in self.all_measures:
+        if(self.perfetcopy):
+            self.all_measures = ws2.all_measures
+        else:
+            self.measure = self.imperfectcopy()
+
+    ##imperfect copy
+    def imperfectcopy(self):
+        for measure in self.all_measures: #loop if we cannot assume learnign is perfect
             up=-1
             if(random.randint(0,1)):up=1
             self.all_measures[measure]["mean"] = ws2.all_measures[measure]["mean"] #+  self.all_measures[measure]["mean"]*self.mutation_power  *up
             self.all_measures[measure]["sd"] = ws2.all_measures[measure]["sd"]
-            #while self.all_measures[measure]["mean"] > self.world_lim[measure]["max"] or self.all_measures[measure]["mean"] < self.world_lim[measure]["min"]:
-            #    if self.all_measures[measure]["mean"] > self.world_lim[measure]["max"]:
-            #        up=-1
-            #    else :
-            #        up = 1 
-            #    self.all_measures[measure]["mean"] = self.all_measures[measure]["mean"] + self.all_measures[measure]["mean"]* self.mutation_power  *up
-            #self.all_measures[measure]["sd"] = ws2.all_measures[measure]["sd"]+  self.all_measures[measure]["sd"]*.0001 *up # + random.random()*self.all_measures["exterior_diam"]["sd"]-self.all_measures["exterior_diam"]["sd"]
+            while self.all_measures[measure]["mean"] > self.world_lim[measure]["max"] or self.all_measures[measure]["mean"] < self.world_lim[measure]["min"]:
+                if self.all_measures[measure]["mean"] > self.world_lim[measure]["max"]:
+                    up=-1
+                else :
+                    up = 1 
+                self.all_measures[measure]["mean"] = self.all_measures[measure]["mean"] + self.all_measures[measure]["mean"]* self.mutation_power  *up
+            self.all_measures[measure]["sd"] = ws2.all_measures[measure]["sd"]+  self.all_measures[measure]["sd"]*.0001 *up  + random.random()*self.all_measures["exterior_diam"]["sd"]-self.all_measures["exterior_diam"]["sd"]
 
     #def dist(self,ws2):
     #    return(mat_dist[self.id,ws2.id])
