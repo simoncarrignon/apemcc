@@ -25,7 +25,10 @@ from Workshop import Workshop #import the agent class
 #"villaseca","malpica",20.97
 #"villaseca","delicias",22.45
 #"villaseca","parlamento",95.33
-realmeans=    {"belen":171.181818181818,"delicias":172.084033613445,"malpica":166.054054054054,"parlamento":163.809523809524,"villaseca":160.207547169811}
+
+realmeans= {"belen":171.181818181818,"delicias":172.084033613445,"malpica":166.054054054054,"parlamento":163.809523809524,"villaseca":160.207547169811}
+
+realsd={"exterior_diam":11,"protruding_rim":5, "rim_w":2.5, "rim_w_2":4}
 
 
 def getrealdist():
@@ -40,10 +43,10 @@ def getrealdist():
     distfile.close()
     return(realdist)
 
-realdist=getrealdist()
+realdist=getrealdist() #a dictionnary storing the distance between all workshop in the form : "workshopAworkshopB"=> dist
 
 
-#Definition of the Agent which are workshop in our case:
+#Definition of a simulation
 class CCSimu(object):
     #"sd",12.3795766686627,8.5207422211249,9.83854926282588,11.6498468434151,13.2438062309636
 
@@ -57,6 +60,7 @@ class CCSimu(object):
     #p_copy=.01 ##probability of copy
     #b_dist=1 #weight of the distance 
 
+
     p_mu=.001
     p_copy=.01
     b_dist=-1 #bias toward distance: when b_dist == -1 <=> no bias <=> transmission depends only of p_copy (horizontal transmission).  b_dist == 1 <=> ultra biased <=> even small distance make  copy 
@@ -67,12 +71,13 @@ class CCSimu(object):
     init=""
     rate_depo=1000 #the rate at wish workshop will write their deposit in the outputfile
 
-    def __init__(self,n_ws,max_time,pref,model,p_mu,p_copy,b_dist,init,dist_list={},outputfile=True):
+    def __init__(self,n_ws,max_time,pref,model,p_mu,p_copy,b_dist,init,dist_list={},outputfile=True,mu_str={}):
         self.n_ws=n_ws
         self.max_time=max_time
         self.pref=pref #us eto classify differetn type of simulation
         self.model=model
         self.p_mu=p_mu
+        self.mu_str=mu_str #a dictionary given for each measure the amplitude of mutation
         self.p_copy=p_copy
         self.b_dist=b_dist
         self.init=init
@@ -109,8 +114,8 @@ class CCSimu(object):
               #rim_inside_h             28.373472         1.1329995  20  39
               #rim_w_2                  31.054947         1.2328019  15  44
               #protruding_rim           18.273888         3.2735080   5  40
-             #exteri    or_diam    inside_diam          rim_h          rim_w        shape_w  rim_inside_h        rim_w_2 protruding_rim
-             #     1    1.126504       9.250002       3.004174       3.494843       1.080722       2.976005       4.216725       4.790658
+             #exterior_diam    inside_diam          rim_h          rim_w        shape_w  rim_inside_h        rim_w_2 protruding_rim
+             #     11.126504       9.250002       3.004174       3.494843       1.080722       2.976005       4.216725       4.790658
             #the mean standard deviation for every measurment
             self.maxdist=max(self.world_dist.values())
             self.mindist=min(self.world_dist.values())
@@ -171,7 +176,7 @@ class CCSimu(object):
                 if( t%self.rate_depo ==0): 
                     ws.produce(t,self.prodfile)
                 if( random.random()< self.p_mu):
-                    ws.mutate()
+                    ws.mutate(self.mu_str)
                 n=random.randint(0,(self.n_ws-1))
                 ws2 = self.world[n]
                 if( ws.id != ws2.id and random.random() < self.p_copy):  #with a proba == self.p_copy we initialize a copy

@@ -50,17 +50,30 @@ class Workshop(object):
 
 
     #mutate: randomly change the parameter of production
-    def mutate(self):
+    def mutate(self,mu_str):
+        percent=0
+
         for measure in self.all_measures:
             up=-1 #increase or decrease the value
             if(random.randint(0,1)):up=1 #randomly  increase or decrease the size
-            self.all_measures[measure]["mean"] = self.all_measures[measure]["mean"] + self.all_measures[measure]["mean"]* self.mutation_power  *up
+
+            if(percent): #two mode of mutation, decrease by a percentage of the measurement or directly using a value
+                new = self.all_measures[measure]["mean"] + self.all_measures[measure]["mean"]* mu_str[measure]*up
+            else:
+                new = self.all_measures[measure]["mean"] +  mu_str[measure]*up
+            self.all_measures[measure]["mean"]=new
+
             while self.all_measures[measure]["mean"] > (self.world_lim[measure]["max"]*1.1) or self.all_measures[measure]["mean"] < (self.world_lim[measure]["min"]*.9):
                 if self.all_measures[measure]["mean"] > (self.world_lim[measure]["max"]*1.1):
                     up=-1
                 else :
                     up = 1 
-                self.all_measures[measure]["mean"] = self.all_measures[measure]["mean"] + self.all_measures[measure]["mean"]* self.mutation_power  *up
+                if(percent): #two mode of mutation, decrease by a percentage of the measurement or directly using a value
+                    new = self.all_measures[measure]["mean"] + self.all_measures[measure]["mean"]* mu_str[measure]*up
+                else:
+                    new = self.all_measures[measure]["mean"] +  mu_str[measure]*up
+                self.all_measures[measure]["mean"]=new
+
             #self.all_measures[measure]["sd"] = self.all_measures[measure]["sd"]+  self.all_measures[measure]["sd"]*self.mutation_power*.01 *up # + random.random()*self.all_measures["exterior_diam"]["sd"]-self.all_measures["exterior_diam"]["sd"]
 
     def copy(self,ws2):
