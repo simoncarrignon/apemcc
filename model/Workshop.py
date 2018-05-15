@@ -18,6 +18,7 @@ class Workshop(object):
         self.production=dict()
         self.prod_rate=prod_rate
         self.dist=dist
+        self.perfectcopy=1
         for measure in all_measures:
             self.production[measure]=list()
         print('New workshop called '+self.id+" at : "+str(self.dist)+" km")
@@ -51,7 +52,7 @@ class Workshop(object):
 
     #mutate: randomly change the parameter of production
     def mutate(self,mu_str):
-        percent=0
+        percent=1
 
         for measure in self.all_measures:
             up=-1 #increase or decrease the value
@@ -75,7 +76,7 @@ class Workshop(object):
                 self.all_measures[measure]["mean"]=new
 
     def copy(self,ws2):
-        if(self.perfetcopy):
+        if(self.perfectcopy):
             self.all_measures = ws2.all_measures
         else:
             self.measure = self.imperfectcopy()
