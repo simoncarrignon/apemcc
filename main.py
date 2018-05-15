@@ -1,5 +1,7 @@
 import sys, getopt
-from apemcc import CCSimu
+from model.apemcc import CCSimu
+from model.apemcc import realdist
+from model.apemcc import realsd
 
 if __name__ == "__main__":
     argv=sys.argv[1:]
@@ -40,8 +42,10 @@ if __name__ == "__main__":
     p_mu=.001 ##mutation probability 1 other 1000 .1 percent
     p_copy=.01 ##probability of copy
     d_weight=.7 #weight of the distance
+    print(realsd)
 
-    main_exp=CCSimu(n_ws,max_time,outfile,model,p_mu,p_copy,alpha,init)
+    print("start")
+    main_exp=CCSimu(n_ws,max_time,outfile,model,p_mu,p_copy,alpha,init,dist_list=realdist,mu_str=realsd)
 
     main_exp.run()
 
