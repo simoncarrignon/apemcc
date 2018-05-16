@@ -1,7 +1,6 @@
 import sys, getopt
 from model.apemcc import CCSimu
-from model.apemcc import realdist
-from model.apemcc import realsd
+from data.ceramic import *
 
 if __name__ == "__main__":
     argv=sys.argv[1:]

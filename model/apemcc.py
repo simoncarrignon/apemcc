@@ -8,45 +8,6 @@ import math
 import csv
 from Workshop import Workshop #import the agent class
 
-#distances between workshops created by google maps
-#"parlamento","belen",72.45
-#"parlamento","delicias",82.01
-#"parlamento","malpica",74.77
-#"belen","parlamento",72.45
-#"belen","delicias",22.82
-#"belen","malpica ",8.73
-#"delicias","parlamento",82.01
-#"delicias","belen",22.82
-#"delicias","malpica",14.19
-#"malpica","parlamento",74.77
-#"malpica","belen",8.73
-#"malpica","delicias",14.19
-#"villaseca","belen",25.23
-#"villaseca","malpica",20.97
-#"villaseca","delicias",22.45
-#"villaseca","parlamento",95.33
-
-realmeans= {"belen":171.181818181818,"delicias":172.084033613445,"malpica":166.054054054054,"parlamento":163.809523809524,"villaseca":160.207547169811}
-
-realsd={"exterior_diam":11,"protruding_rim":5, "rim_w":2.5, "rim_w_2":4}
-realsd={"exterior_diam":.05,"protruding_rim":.05, "rim_w":.05, "rim_w_2":0.05}
-
-
-def getrealdist():
-    print("load workshop distiance using the file 'data/distmetrics.csv'")
-    realdist={}
-    with open('data/distmetrics.csv','rb') as distfile:
-          distances = csv.reader(distfile, delimiter=',')
-          for row in distances:
-              realdist[row[0]+row[1]]=float(row[2]) #print(row)
-              realdist[row[1]+row[0]]=float(row[2]) #print(row)
-          #worldlist[distances[1]] = {distances[2],distances[3]}
-    distfile.close()
-    return(realdist)
-
-realdist=getrealdist() #a dictionnary storing the distance between all workshop in the form : "workshopAworkshopB"=> dist
-
-
 #Definition of a simulation
 class CCSimu(object):
     #"sd",12.3795766686627,8.5207422211249,9.83854926282588,11.6498468434151,13.2438062309636
