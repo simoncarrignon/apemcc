@@ -33,7 +33,7 @@ class CCSimu(object):
     init=""
     rate_depo=1000 #the rate at wish workshop will write their deposit in the outputfile
 
-    def __init__(self,n_ws,max_time,pref,model,p_mu,p_copy,b_dist,init,dist_list={},outputfile=True,mu_str={}):
+    def __init__(self,n_ws,max_time,pref,model,p_mu,p_copy,b_dist,init,dist_list={},outputfile=True,mu_str=[]):
         self.n_ws=n_ws
         self.max_time=max_time
         self.pref=pref #us eto classify differetn type of simulation
