@@ -19,7 +19,7 @@ class Workshop(object):
         self.prod_rate=prod_rate
         self.dist=dist
         self.perfectcopy=1
-        for measure in all_measures:
+        for measure in self.all_measures:
             self.production[measure]=list()
         print('New workshop called '+self.id+" at : "+str(self.dist)+" km")
 
@@ -54,26 +54,29 @@ class Workshop(object):
     def mutate(self,mu_str):
         percent=1
 
+        indm=0
         for measure in self.all_measures:
             up=-1 #increase or decrease the value
             if(random.randint(0,1)):up=1 #randomly  increase or decrease the size
-
+            cur=self.all_measures[measure]["mean"]  #current measure
+            ms=mu_str[indm] #strenght for this corresponding measure
             if(percent): #two mode of mutation, decrease by a percentage of the measurement or directly using a value
-                new = self.all_measures[measure]["mean"] + self.all_measures[measure]["mean"]* mu_str[measure]*up
+                new = cur + cur * ms * up
             else:
-                new = self.all_measures[measure]["mean"] +  mu_str[measure]*up
-            self.all_measures[measure]["mean"]=new
+                new = cur +  ms * up
 
-            while self.all_measures[measure]["mean"] > (self.world_lim[measure]["max"]*1.1) or self.all_measures[measure]["mean"] < (self.world_lim[measure]["min"]*.9):
-                if self.all_measures[measure]["mean"] > (self.world_lim[measure]["max"]*1.1):
+            while new > (self.world_lim[measure]["max"]*1.1) or new < (self.world_lim[measure]["min"]*.9):
+                if new > (self.world_lim[measure]["max"]*1.1):
                     up=-1
                 else :
                     up = 1 
-                if(percent): #two mode of mutation, decrease by a percentage of the measurement or directly using a value
-                    new = self.all_measures[measure]["mean"] + self.all_measures[measure]["mean"]* mu_str[measure]*up
+                if(percent):
+                    new = cur + cur * ms * up
                 else:
-                    new = self.all_measures[measure]["mean"] +  mu_str[measure]*up
-                self.all_measures[measure]["mean"]=new
+                    new = cur + ms * up
+
+            self.all_measures[measure]["mean"]=new
+            indm+=1
 
     def copy(self,ws2):
         if(self.perfectcopy):
