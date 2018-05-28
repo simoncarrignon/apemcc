@@ -4,7 +4,7 @@
 
 if(require("vioplot")){library(vioplot)}
 if(require("vegan")){library(vegan)}
-
+if(require("scales")){library(scales)}
 
 ##Some command use to analyse the output of the model used with theoretical distances and some examples
 analyseModel<-function(){i # you want to create a function use this line. Remember close with {}
