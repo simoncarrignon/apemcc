@@ -133,7 +133,7 @@ class CCSimu(object):
 
     def run(self): ##main function of the class Experiment => run a simulation
 
-        relative=True
+        relative=True #relative distance to normalize the distance between 0 and 1 where 0 is the distance 
 ##begining of the simulation
         print("starting the simulation with copy mechanism: "+str(self.model)+" and b_dist="+str(self.b_dist))
         for t in range(0,self.max_time,1):  
