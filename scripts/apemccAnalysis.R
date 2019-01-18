@@ -636,3 +636,97 @@ getRealData <- function(){
         print(xtable(tabletest),include.rownames=F,file="../doc/multivariate.tex")
 
     }
+
+
+    drawMap <- function(){
+        library(OpenStreetMap)
+        #Random point to plot in the graph
+        res=read.csv("../data/drespaper.csv")
+        res=res[res$type %in% c("Dressel C","Dressel D","Dressel E"),]
+        pca=prcomp(t(res[,4:12]),scale=T) 
+        fdata=cbind.data.frame(pca$rotation[,c("PC1","PC2")],as.character(res$site))
+        #fdata[,1:2]=-1*fdata[,1:2]
+        fdata$PC1=log(-fdata$PC1) 
+        colnames(fdata)=c("x","y","city")
+
+        #random coordinate to plot in the map
+        cities=read.csv("../latlong.csv")
+        colnames(cities)=c("name","long","lat")
+
+        #city to color correspondance
+        color=1:length(cities$name)
+        names(color)=cities$name
+
+        hues = seq(15, 375, length = length(color)+1)
+        color=hcl(h = hues, l = 65, c = 100)[1:length(color)]
+
+        maxlat=max(cities$lat)
+        maxlong=max(cities$long)
+        minlat=min(cities$lat)
+        minlong=min(cities$long)
+
+        #get some open street map
+        map = openmap(c(lat=maxlat+0.02,long=minlong-0.04 ) ,
+                                    c(lat=minlat-0.02,long=maxlong+.04) ,
+                                                  minNumTiles=9,type="osm")
+        longlat=openproj(map) #Change coordinate projection
+
+
+        par(mfrow=c(2,1),mar=c(0,5,4,6))
+
+        plot( fdata$y ~ fdata$x ,xaxt="n",ylab="Comp.2",xlab="",col=color[fdata$city],pch=20)
+        axis(3)
+        mtext(side=3,"-Comp.1",line=3)
+        par(mar=rep(1,4))
+
+        #plot the map
+        plot(longlat,removeMargin=F)
+        points(cities$lat ~ cities$long, col= color[cities$name],cex=1,pch=20)
+        text(cities$long,cities$lat-0.005,labels=cities$name)
+
+        library(grid)      ## <-- My addition
+        library(gridBase)  ## <-- My addition
+        par(mfrow=c(2,1),mar=c(0,5,4,6))
+        plot(fdata$y ~ fdata$x, xaxt = "n", ylab = "Comp.2", xlab = "",
+                  col = color[fdata$city],pch=20)
+        vps1 <- do.call(vpStack, baseViewports()) ## <-- My addition
+        axis(3)
+        mtext(side = 3,"-Comp.1",line=3)
+        par(mar = rep(1,4))
+
+        #plot the map
+        plot(longlat,removeMargin=F)
+        vps2 <- do.call(vpStack, baseViewports()) ## <-- My addition
+        points(cities$lat ~ cities$long, col= color[cities$name],cex=3,pch=20)
+        text(cities$long,cities$lat-0.005,labels=cities$name)
+
+        ## My addition from here on out...    
+
+        ## A function that draws a line segment between two points (each a
+        ## length two vector of x-y coordinates), the first point in the top
+        ## plot and the second in the bottom plot.
+        drawBetween <- function(ptA, ptB, gp = gpar()) {
+            ## Find coordinates of ptA in "Normalized Parent Coordinates"
+            pushViewport(vps1)
+            X1 <- convertX(unit(ptA[1],"native"), "npc")
+            Y1 <- convertY(unit(ptA[2],"native"), "npc")
+            popViewport(3)
+            ## Find coordinates of ptB in "Normalized Parent Coordinates"
+            pushViewport(vps2)
+            X2 <- convertX(unit(ptB[1],"native"), "npc")
+            Y2 <- convertY(unit(ptB[2],"native"), "npc")
+            popViewport(3)
+            ## Plot line between the two points
+            grid.move.to(x = X1, y = Y1, vp = vps1)
+            grid.line.to(x = X2, y = Y2, vp = vps2, gp = gp)
+        }
+
+ 
+        ## Using a loop, draw lines from each point in `fdata` to its
+        ## corresponding city in `cities`
+        for(i in seq_len(nrow(fdata))) {
+            ptA <- fdata[i, c("x", "y")]
+            ptB <- cities[match(fdata[i,"city"], cities$name), c("long", "lat")]
+            drawBetween(ptA, ptB, gp = gpar(col = alpha(color[fdata[i,"city"]],.3)))
+        }
+
