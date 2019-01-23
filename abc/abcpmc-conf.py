@@ -9,7 +9,7 @@ from data.ceramic import *
 ### if use with MPI
 #from abcpmc import mpi_util
 
-pref="bigo"#sys.argv[1] #a prefix that will be used as a folder to store the result of the ABC
+pref=sys.argv[1] #a prefix that will be used as a folder to store the result of the ABC
 #
 if not os.path.exists(pref):
     os.makedirs(pref)
