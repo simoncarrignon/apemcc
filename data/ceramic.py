@@ -22,7 +22,7 @@ realsd=[.05,.05, .05, 0.05]
 def getrealdist():
     print("load workshop distiance using the file 'data/distmetrics.csv'")
     realdist={}
-    with open('data/distmetrics.csv','rb') as distfile:
+    with open('data/distmetrics.csv','r') as distfile:
           distances = csv.reader(distfile, delimiter=',')
           for row in distances:
               realdist[row[0]+row[1]]=float(row[2]) #print(row)
@@ -34,7 +34,7 @@ def getrealdist():
 def getallmean():
     print("load workshop distiance using the file 'allmean'")
     allmeans={}
-    with open('data/mean_allmeasurment.csv','rb') as meanfile:
+    with open('data/mean_allmeasurment.csv','r') as meanfile:
           rawmeans = csv.DictReader(meanfile, delimiter=',')
           for row in rawmeans:
               allmeans[row['']]=row
