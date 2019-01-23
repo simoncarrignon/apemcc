@@ -7,30 +7,34 @@ if(require("vegan")){library(vegan)}
 if(require("scales")){library(scales)}
 
 ##Some command use to analyse the output of the model used with theoretical distances and some examples
-analyseModel<-function(){i # you want to create a function use this line. Remember close with {}
+analyseModel<-function(){ # you want to create a function use this line. Remember close with {}
 
-    model=read.csv("result.csv")  
+    model=read.csv("../singletest_N10.csv")  
     #model=model[!is.na(model)]
     model=model[model$time >= max(model$time)-1000,]
     lastItmodel=getIt(model)
     #cubeCC=cubeC[cubeC$time >= max(cubeC$time)-1000,]; 
     #model=model[order(model$dist),];
-   
-   
-#version ggplot2 boxplot
-png("test_1.png")
-ggplot(model, aes(factor(workshop),exterior_diam)) + geom_boxplot(fill = "slategray3", colour = "slategray")
-dev.off()
 
-#violin version
-ggplot(model, aes(factor(workshop),exterior_diam)) + geom_violin(fill = "slategray3", colour = "slategray")
 
-#normal version to test the exterior_diam
-png("CYDS.png")
-boxplot(model$exterior_diam ~ model$dist,ylab="exterior_rim",xlab="workshop",xaxt="n")
-axis(1,labels=levels(model$workshop),at=1:length(unique(model$dist)))
-dev.off()
-    }
+    #version ggplot2 boxplot
+    png("test_1.png")
+    ggplot(model, aes(factor(workshop),exterior_diam)) + geom_boxplot(fill = "slategray3", colour = "slategray")
+    dev.off()
+
+    #violin version
+    ggplot(model, aes(factor(workshop),exterior_diam)) + geom_violin(fill = "slategray3", colour = "slategray")
+
+    #normal version to test the exterior_diam
+    png("CYDS.png")
+    boxplot(model$exterior_diam ~ model$dist,ylab="exterior_rim",xlab="workshop",xaxt="n")
+    axis(1,labels=levels(model$workshop),at=1:length(unique(model$dist)))
+    dev.off()
+
+    #Check how size chang e through time for one workshop:
+    boxplot(model$exterior_diam[model$workshop == "ws_1"] ~ model$time[model$workshop == "ws_1"],ylab="exterior_rim",xlab="time")
+
+}
 
 ##Below a collection of commands used to explore the real data
 ## Exemple: to extract the mean of different measurement etc...
