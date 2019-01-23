@@ -30,19 +30,21 @@ def dist(x, y):
 #our "model", a gaussian with varying means
 def postfn(theta):
     # we reject the particul with no credible parameters (ie pop < 0 etc...)
-    if(theta[0]>1 or theta[1]<0 or theta[1]>1 or theta[0]<0):
+    #if(theta[0]>1 or theta[1]<0 or theta[1]>1 or theta[0]<0):
+    if(theta[1]>1 or theta[1]<0 or theta[2]<-1 or theta[2]>1):
         return([-10000])
     else:
-        p_mu=theta[0]
-        p_copy=theta[1]
+        time=int(theta[0])
+        p_mu=theta[1]
+        alpha=theta[2]
         ## we fixed the number of time step and we look only at three parameter: posize copy and mutation
-        exp=CCSimu(-1,3000,pref,-1,p_mu,p_copy,0,"file",dist_list=realdist,outputfile=False,mu_str=realsd,log=False)
+        exp=CCSimu(-1,time,pref,-1,p_mu,0,alpha,"file",dist_list=realdist,outputfile=False,mu_str=realsd,log=False)
         return exp.run()
 
 data={'sd':allsds,'mean':allmeans}  #we dont use it in this expe
 
-eps = ExponentialEps(200,15, 0.0001)
-prior = TophatPrior([0,0],[1,1])
+eps = ExponentialEps(200,100, 0.001)
+prior = TophatPrior([1000,0,-1],[100000,1,1])
 
 pref=sys.argv[1] #a prefix that will be used as a folder to store the result of the ABC
 #
