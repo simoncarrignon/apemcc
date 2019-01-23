@@ -48,12 +48,33 @@ boxplot(model$exterior_diam[model$workshop == "ws_1"] ~ model$time[model$worksho
 
 As an intermediate way between the single simulation and a full ABC using MPI you can play with the script used to generate the result use for the first versions of the exploration of the model
 
+### Run batch of experiments:
+
 ```bash
-bash scripts/scriptRunAll.sh folder
+bash scripts/scriptRunAll.sh store_expe
 ```
 
 where `folder` is the path to a folder where the results of the experiment will be stored
 
 It should be noted that this is a modification done in order to simulate the first bias with the new `alpha` parameter
 
-## Simple experiments with Thresholded bias :
+### Analysis
+This time we have a folder `store_expe` that contains three folder that contains thousand of file like the one analysed in the first section.
+To read all that in once one can use `readFolder` from the file `scripts/apemccAnalysis.R`.
+
+A manual way to do that is set in `YSLR_man` function, which correspond to the function used to generate all we use for the YSLR poster.
+
+A quick way to plot all the result :
+
+```R
+allresults=lapply(listsubexpe,readFolder)
+plotDensities(sapply(lapply(lapply(allresults,getIt),as.data.frame),varSim,vari=var),epsilon=names(allresults))
+```
+
+That should gives something like:
+
+![Density of the three expe](doc/images/example3dens.png)
+
+Some adjustment could be done, here `varSim` use the default metrics `exterior_diam` and it should be more flexible.
+
+## ABC
