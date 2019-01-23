@@ -146,8 +146,9 @@ class CCSimu(object):
                     ws.produce(t,self.prodfile)
                 if( random.random()< self.p_mu):
                     ws.mutate(self.mu_str)
-                ws2 = self.world[random.choice(list(self.world.keys()))]
-                if( ws.id != ws2.id and random.random() < self.p_copy):  #with a proba == self.p_copy we initialize a copy
+                else: 
+                    ws2 = self.world[random.choice(list(self.world.keys()))]
+                    while( ws.id == ws2.id): ws2 = self.world[random.choice(list(self.world.keys()))]
                     if(self.init=="file"):
                         dist=self.world_dist[ws2.id+ws.id] #get the distance between two given workshop
                     elif self.init == "art":
