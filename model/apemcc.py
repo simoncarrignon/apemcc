@@ -116,7 +116,8 @@ class CCSimu(object):
 
     #strenght of the bias toward distance.
     def beta_d(self,dist):
-        #if(self.b_dist> 0):
+        #if(epsilon>1):
+               #if(self.b_dist> 0):  
         #    return( -pow(d,100 ** self.b_dist))
         #else: #(self.b_dist=< 0):
         #    return( -(1-pow(d,100 ** self.b_dist)))
