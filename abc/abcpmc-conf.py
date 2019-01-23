@@ -1,5 +1,5 @@
 from sampler import *
-from abcpmc import LinearEps
+from threshold import *
 import numpy as np
 import sys,os
 
