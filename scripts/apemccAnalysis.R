@@ -611,6 +611,15 @@ getRealData <- function(){
     res
     }
 
+    #' getAllSimulationFromFolder
+    #'
+    #' get all tthe subfolder of a folder
+    getAllSimulationFromFolder <- function(folder){
+        listsubexpe=list.dirs(folder,recursive=F)
+        names(listsubexpe)=basename(listsubexpe)
+        return(listsubexpe)
+    }
+
 
     ###Testing normal distribution assumptions
     graphAllhist <- function(){
