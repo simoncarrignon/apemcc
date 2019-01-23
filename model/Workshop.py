@@ -11,7 +11,7 @@ class Workshop(object):
     production={}
 
     #This function allow us to create a new workshop 
-    def __init__(self, id, dist,all_measures,prod_rate,world_lim):
+    def __init__(self, id, dist,all_measures,prod_rate,world_lim,log=True):
         self.all_measures=all_measures
         self.world_lim=world_lim
         self.id=id
@@ -19,9 +19,10 @@ class Workshop(object):
         self.prod_rate=prod_rate
         self.dist=dist
         self.perfectcopy=1
+        self.log=log
         for measure in self.all_measures:
             self.production[measure]=list()
-        print('New workshop called '+self.id+" at : "+str(self.dist)+" km")
+        if self.log: print('New workshop called '+self.id+" at : "+str(self.dist)+" km")
 
     #fonction to use  str() in order to print a workshop as a string (in this case doesnt work with this code)
     #def __str__(self):

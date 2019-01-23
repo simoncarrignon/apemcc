@@ -34,7 +34,7 @@ class CCSimu(object):
     init=""
     rate_depo=1000 #the rate at wish workshop will write their deposit in the outputfile
 
-    def __init__(self,n_ws,max_time,pref,model,p_mu,p_copy,b_dist,init,dist_list={},outputfile=True,mu_str=[]):
+    def __init__(self,n_ws,max_time,pref,model,p_mu,p_copy,b_dist,init,dist_list={},outputfile=True,mu_str=[],log=True):
         self.n_ws=n_ws
         self.max_time=max_time
         self.pref=pref #us eto classify differetn type of simulation
@@ -44,10 +44,11 @@ class CCSimu(object):
         self.p_copy=p_copy
         self.b_dist=b_dist
         self.init=init
+        self.log=log
         self.ouputfile=outputfile
         #if(len(mu_str) < 1) self.mu_str={
 
-        print('Initialization of the world')
+        if self.log :print('Initialization of the world')
 
         self.world = dict() #initialisation of the world
         self.world_dist=dict() #dictionnaire to store the distance of the cities two by two
@@ -57,8 +58,8 @@ class CCSimu(object):
             if(len(dist_list) >0):
                 self.world_dist = dist_list
             else:
-                print("initialize the workshop using the file 'data/distmetrics.csv'")
-                print("warning:argument"+" number of workshop"+" will be ignored")
+                if self.log : print("initialize the workshop using the file 'data/distmetrics.csv'")
+                if self.log : print("warning:argument"+" number of workshop"+" will be ignored")
                 with open('data/distmetrics.csv','rb') as distfile:
                       distances = csv.reader(distfile, delimiter=',')
                       for row in distances:
@@ -66,7 +67,7 @@ class CCSimu(object):
                           self.world_dist[row[1]+row[0]]=float(row[2]) #print(row)
                       #worldlist[distances[1]] = {distances[2],distances[3]}
                 distfile.close()
-                print(distfile)
+                if self.log : print(distfile)
 
               #(1) mean of mean btw ws (2)sd of mean btw ws (3)min (4)max
               #measurement:             (1)                 (2)     (3) (4)
@@ -86,16 +87,16 @@ class CCSimu(object):
              
             for ws in  {"villaseca","belen","malpica","delicias","parlamento"}:
                 dist=10 #this is not use in that case as the "distance" are given by the dictionnary world_dict
-                new_ws= Workshop(ws,dist,{"exterior_diam":{"mean":167.90,"sd":11},"protruding_rim":{"mean":18.30,"sd":5}, "rim_w":{"mean":37.23,"sd": 2.5}, "rim_w_2":{"mean": 31.24,"sd": 4}},100,self.world_lim)
+                new_ws= Workshop(ws,dist,{"exterior_diam":{"mean":167.90,"sd":11},"protruding_rim":{"mean":18.30,"sd":5}, "rim_w":{"mean":37.23,"sd": 2.5}, "rim_w_2":{"mean": 31.24,"sd": 4}},100,self.world_lim,log=self.log)
                 self.world[ws]=new_ws
             self.n_ws=len(self.world)
 
         elif self.init=="art":
-            print("initialize"+str(self.n_ws)+" workshop randomly")
+            if self.log : print("initialize"+str(self.n_ws)+" workshop randomly")
             for ws in range(self.n_ws):
                 dist=ws
                 wsid='ws_'+str(ws)
-                new_ws= Workshop(wsid,dist,{"exterior_diam":{"mean":167.7+ws,"sd":12.26},"protruding_rim":{"mean":19+ws,"sd":5.6}},10,self.world_lim)
+                new_ws= Workshop(wsid,dist,{"exterior_diam":{"mean":167.7+ws,"sd":12.26},"protruding_rim":{"mean":19+ws,"sd":5.6}},10,self.world_lim,log=self.log)
                 self.world[wsid]=new_ws
             self.maxdist=self.n_ws
             self.mindist=0
@@ -137,7 +138,7 @@ class CCSimu(object):
 
         relative=True #relative distance to normalize the distance between 0 and 1 where 0 is the distance 
 ##begining of the simulation
-        print("starting the simulation with copy mechanism: "+str(self.model)+" and b_dist="+str(self.b_dist))
+        if self.log : print("starting the simulation with copy mechanism: "+str(self.model)+" and b_dist="+str(self.b_dist))
         for t in range(0,self.max_time,1):  
             for i in self.world.keys() :
                 ws=self.world[i]
@@ -165,6 +166,6 @@ class CCSimu(object):
                         ws.copy(ws2)  
         if(self.prodfile!=""):
             self.prodfile.close()
-        print("simulation done.")
+        if self.log : print("simulation done.")
         return(self.world)
 
