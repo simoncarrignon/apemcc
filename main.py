@@ -16,14 +16,14 @@ if __name__ == "__main__":
     try:
         opts, args = getopt.getopt(argv,"hw:t:f:a:i:m:",)
     except getopt.GetoptError:
-        print use
+        print(use)
         sys.exit(2)
     if len(opts) < 1:
-        print use
+        print(use)
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print use
+            print(use)
             sys.exit()
         elif opt == "-w":
            n_ws = int(arg)
