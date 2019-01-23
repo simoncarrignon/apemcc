@@ -78,3 +78,76 @@ That should gives something like:
 Some adjustment could be done, here `varSim` use the default metrics `exterior_diam` and it should be more flexible.
 
 ## ABC
+### Prepare the folder
+
+To avoid confusion all abc study should be done in the folder `abc/`
+```bash
+cd abc/
+```
+
+We then need the module from Akeret 2016 (the doc for this module is [here](https://github.com/jakeret/abcpmc)) :
+
+```bash
+git clone https://github.com/jakeret/abcpmc
+```
+
+and we will link the file from Akeret and the model (aka a dirty instal) :
+
+```bash
+ln -s ../model .
+ln -s ../data .
+ln -s abcpmc/abcpmc/*.py . #this suppose abmpc is cloned in the folder `abc/`
+```
+
+(obviously those random ln could be done better with a better handling of python modules...)
+
+### Run one experiment:
+
+One this is done we can run the wrapper of the jakeret module `abc/abcpmc-conf.py`
+
+```bash
+python abc/abcpmc-conf.py bias
+```
+
+Where `bias` has  here two function : it is the prefix that will use to create a folder where the result of the ABC will be stored and it tell `ConformitySimu()` the bias to be used during the simulation. Thus for the current experiments the string `bias` should be one of:  ["neutral","anti","conf"]
+
+By default the step of the ABC will 5 step from 1 to 0.115, with some preselected prior. To change that one should modify this in `abc/abcpmc-conf.py`:
+```python
+eps = LinearEps(5, 1, 0.115)
+prior = TophatPrior([10,100,0,0],[1000,1000,1,1])
+```
+
+The number of particles (_ie_ simulations) test is by default 100 and defined here:
+
+```python
+sampler = Sampler(N=100, Y=data, postfn=postfn, dist=dist)
+
+```
+
+
+If nothing is change from the default value one can then run 3 abc for the 3 different bias by doing (from the folder `abc/`)
+```bash
+for bias in neutral anti conf;
+do
+    python abcpmc-conf.py 
+done
+```
+
+__Warning__ : this may take a few seconds/minutes.
+
+
+With 5 file in each. Each file contains a csv.The rows represent each selected particles (simulation) for this step of the ABC. The columns correspond to the parameters of the selected simulations.
+
+### Analyse the results
+The _final_ results can be obtained by comparing the csv file from each folder with the smallest epsilon. That can be done with whatever tools you want to us.
+
+But a simple R script come with the repo that allow to quickly output the main result of the multiples ABC. To use it just link the files from the script to the current `abc/` folder (yes this folder will start to look dirty, should be done another way). And then use `Rscript` to run the script:
+```bash
+ln ../script/*.R .
+Rscript draft.R
+```
+
+With the default value  of the ABC as set in `abcpmc-conf.py`, those results are meaningless. More particles should be selected, the smallest epsilon should be smaller and the prior ranges should be wider. 
+
+To be able to do so, `MPI` is almost mandatory. Scripts using mpi can easily be run in Marenostrun using the SLURM job file:  `abc/generic_mnjob.job`. 
+At the same time the python mpi module has to be imported and the call to `sampler` has to be slightly adapted. Both thing should be in the `model/*.py` files in commented lines of code.
