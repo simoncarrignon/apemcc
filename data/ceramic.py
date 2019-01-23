@@ -32,7 +32,7 @@ def getrealdist():
     return(realdist)
     
 def getallmean():
-    print("load workshop distiance using the file 'allmean'")
+    print("load mean for all measure for all workshop 'allmean'")
     allmeans={}
     with open('data/mean_allmeasurment.csv','r') as meanfile:
           rawmeans = csv.DictReader(meanfile, delimiter=',')
@@ -41,9 +41,20 @@ def getallmean():
     meanfile.close()
     return(allmeans)
 
+def getallsd():
+    print("load sd for all measure for all workshop 'allsd'")
+    allsds={}
+    with open('data/sd_allmeasurment.csv','r') as sdfile:
+          rawsds = csv.DictReader(sdfile, delimiter=',')
+          for row in rawsds:
+              allsds[row['']]=row
+    sdfile.close()
+    return(allsds)
+
 #distances between workshops created by google maps
 realdist=getrealdist() #a dictionnary storing the distance between all workshop in the form : "workshopAworkshopB"=> dist
 
-allmeans=getallmean() #a dictionnary storing the distance between all workshop in the form : "workshopAworkshopB"=> dist
+allmeans=getallmean() #a dictionnary storing the mean
+allsds=getallsd() #a dictionnary storing the sd
 
 
