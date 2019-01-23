@@ -599,18 +599,24 @@ dev.off()
 
 }
 
-getRealData <- function(){
+getRealData <- function(emp){
     res=t(sapply(colnames(emp)[5:12],function(i)  c(mean(tapply(emp[,i],emp$site,mean)),sd(tapply(emp[,i],emp$site,mean)),min(emp[,i]),max(emp[,i]))))
     colnames(res)=c("mean of mean btw ws","sd of mean btw ws","min","max")
     return(res)
 }
 
-    getRealMeasurment <- function() {
-    res=read.csv("../data/drespaper.csv")
+getRealMeasurment <- function(datafile="../data/drespaper.csv") {
+    res=read.csv(datafile)
     res=res[ res$type %in% c("Dressel C","Dressel D","Dressel E") ,]
     res
-    }
+}
 
+getSummaryStatistics <- function(emp,stat=mean){
+    apply(emp[,5:12],2,tapply,emp$site,stat)
+}
+
+write.csv(file="../data/mean_allmeasurment.csv",getSummaryStatistics(getRealMeasurment(),mean))
+write.csv(file="../data/sd_allmeasurment.csv",getSummaryStatistics(getRealMeasurment(),sd))
     #' getAllSimulationFromFolder
     #'
     #' get all tthe subfolder of a folder
