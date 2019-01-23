@@ -1,0 +1,23 @@
+#!/bin/bash
+#SBATCH --job-name=evoconf_%j
+#SBATCH --output=evoconf_%j.out
+#SBATCH --error=evoconf_%j.err
+#SBATCH --ntasks=480
+#SBATCH --cpus-per-task=1
+#SBATCH --time=01:30:00
+#SBATCH --qos=debug
+
+module purge
+module load intel impi mkl
+module load python/2.7.13
+
+
+start=`date +%s` #record the time to log the total execution time
+
+mpirun -n 480 python abcpmc-conf.py $1
+
+end=`date +%s`
+
+runtime=$((end-start))
+
+echo "total time: $runtime"
