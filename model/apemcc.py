@@ -6,7 +6,8 @@
 import random 
 import math
 import csv
-from Workshop import Workshop #import the agent class
+from model.Workshop import Workshop #import the agent class
+from data.ceramic import *
 
 #Definition of a simulation
 class CCSimu(object):
@@ -48,7 +49,7 @@ class CCSimu(object):
 
         print('Initialization of the world')
 
-        self.world = list() #initialisation of the world
+        self.world = dict() #initialisation of the world
         self.world_dist=dict() #dictionnaire to store the distance of the cities two by two
 
         self.world_lim={"exterior_diam":{"min":130,"max":200},"protruding_rim":{"min":5,"max":40}, "rim_w":{"min":25,"max": 48}, "rim_w_2":{"min": 15,"max": 44}}
@@ -86,15 +87,16 @@ class CCSimu(object):
             for ws in  {"villaseca","belen","malpica","delicias","parlamento"}:
                 dist=10 #this is not use in that case as the "distance" are given by the dictionnary world_dict
                 new_ws= Workshop(ws,dist,{"exterior_diam":{"mean":167.90,"sd":11},"protruding_rim":{"mean":18.30,"sd":5}, "rim_w":{"mean":37.23,"sd": 2.5}, "rim_w_2":{"mean": 31.24,"sd": 4}},100,self.world_lim)
-                self.world.append(new_ws)
+                self.world[ws]=new_ws
             self.n_ws=len(self.world)
 
         elif self.init=="art":
             print("initialize"+str(self.n_ws)+" workshop randomly")
             for ws in range(self.n_ws):
                 dist=ws
-                new_ws= Workshop('ws_'+str(ws),dist,{"exterior_diam":{"mean":167.7+ws,"sd":12.26},"protruding_rim":{"mean":19+ws,"sd":5.6}},10,self.world_lim)
-                self.world.append(new_ws)
+                wsid='ws_'+str(ws)
+                new_ws= Workshop(wsid,dist,{"exterior_diam":{"mean":167.7+ws,"sd":12.26},"protruding_rim":{"mean":19+ws,"sd":5.6}},10,self.world_lim)
+                self.world[wsid]=new_ws
             self.maxdist=self.n_ws
             self.mindist=0
                 
@@ -137,13 +139,13 @@ class CCSimu(object):
 ##begining of the simulation
         print("starting the simulation with copy mechanism: "+str(self.model)+" and b_dist="+str(self.b_dist))
         for t in range(0,self.max_time,1):  
-            for ws in self.world :
+            for i in self.world.keys() :
+                ws=self.world[i]
                 if( t%self.rate_depo ==0): 
                     ws.produce(t,self.prodfile)
                 if( random.random()< self.p_mu):
                     ws.mutate(self.mu_str)
-                n=random.randint(0,(self.n_ws-1))
-                ws2 = self.world[n]
+                ws2 = self.world[random.choice(list(self.world.keys()))]
                 if( ws.id != ws2.id and random.random() < self.p_copy):  #with a proba == self.p_copy we initialize a copy
                     if(self.init=="file"):
                         dist=self.world_dist[ws2.id+ws.id] #get the distance between two given workshop
@@ -163,8 +165,6 @@ class CCSimu(object):
                         ws.copy(ws2)  
         if(self.prodfile!=""):
             self.prodfile.close()
-
         print("simulation done.")
-
-
+        return(self.world)
 
