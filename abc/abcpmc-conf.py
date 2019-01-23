@@ -10,7 +10,6 @@ from data.ceramic import *
 from  mpi_util import *
 
 
-
 #distance function: sum of abs mean differences, we take Y (the evidenceS) as a list of percentage of the same sie than x but with value .95. _ie_ our evidence are a theoretical case where all the goods are at 95% of the same type during all the years
 def dist(x, y):
     #for w in x.keys():
@@ -42,7 +41,7 @@ def postfn(theta):
 
 data={'sd':allsds,'mean':allmeans}  #we dont use it in this expe
 
-eps = ExponentialEps(50, 0.00001, 20)
+eps = ExponentialEps(20,50, 0.00001)
 prior = TophatPrior([0,0],[1,1])
 
 pref=sys.argv[1] #a prefix that will be used as a folder to store the result of the ABC
@@ -62,10 +61,10 @@ if mpi_pool.isMaster():
 
 for pool in sampler.sample(prior, eps):
     if mpi_pool.isMaster():
-        print(pref+"/output.txt","T:{0},eps:{1:>.4f},ratio:{2:>.4f}".format(pool.t, pool.eps, pool.ratio))
+        np.savetxt(pref+"/output.txt","T:{0},eps:{1:>.4f},ratio:{2:>.4f}".format(pool.t, pool.eps, pool.ratio))
         for i, (mean, std) in enumerate(zip(np.mean(pool.thetas, axis=0), np.std(pool.thetas, axis=0))):
-            print(pref+"/output.txt",u"    theta[{0}]: {1:>.4f} \u00B1 {2:>.4f}".format(i, mean,std))
+            np.savetxt(pref+"/output.txt",u"    theta[{0}]: {1:>.4f} \u00B1 {2:>.4f}".format(i, mean,std))
 
-    np.savetxt(pref+"/result_"+str(pool.eps)+".csv", pool.thetas, delimiter=",",fmt='%1.5f',comments="")
+        np.savetxt(pref+"/result_"+str(pool.eps)+".csv", pool.thetas, delimiter=",",fmt='%1.5f',comments="")
     #np.savetxt(bias+"/result_"+str(pool.eps)+".csv", pool.thetas, delimiter=",",header="n_agents,time,p_mu,p_copy",fmt='%1.5f',comments="")
 
