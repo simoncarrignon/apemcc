@@ -49,8 +49,8 @@ def postfn(theta):
 
 data={'sd':allsds,'mean':allmeans}  #we dont use it in this expe
 
-eps = ExponentialEps(200,25, 0.01)
-prior = TophatPrior([0,-1],[0.01,1])
+eps = ExponentialEps(200,1, 0.01)
+prior = TophatPrior([0,-1],[1,1])
 
 pref=sys.argv[1] #a prefix that will be used as a folder to store the result of the ABC
 mpi=bool(sys.argv[2])
