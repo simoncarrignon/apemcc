@@ -67,8 +67,10 @@ A manual way to do that is set in `YSLR_man` function, which correspond to the f
 A quick way to plot all the result :
 
 ```R
+listsubexpe=list.dirs("awewer/",recursive=F)
+names(listsubexpe)=basename(listsubexpe) 
 allresults=lapply(listsubexpe,readFolder)
-plotDensities(sapply(lapply(lapply(allresults,getIt),as.data.frame),varSim,vari=var),epsilon=names(allresults))
+plotDensities(sapply(lapply(lapply(allresults,getIt),as.data.frame),varSim,vari),epsilon=names(allresults))
 ```
 
 That should gives something like:
