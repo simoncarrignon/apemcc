@@ -20,9 +20,11 @@ def dist(x, y):
         return(10000)
     for w in x.keys():
         allm=x[w].production["protruding_rim"]
-        realsummary=data['mean'][w]["protruding_rim"]
-        realsummary=np.mean(allm[len(allm)-(10*1000):])
-        alldist.append(abs(realsummary-np.mean(allm)))
+        realsummary=float(data['mean'][w]["protruding_rim"])
+        sample=min(100,len(allm))
+        lastm=allm[-sample:]
+        meanlastm=np.mean(lastm)
+        alldist.append(abs(realsummary-meanlastm))
     return np.mean(alldist)
 
 #our "model", a gaussian with varying means
