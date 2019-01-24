@@ -59,9 +59,11 @@ if mpi:
 else:
     sampler = Sampler(N=200, Y=data, postfn=postfn, dist=dist)
 
+sampler.particle_proposal_cls = OLCMParticleProposal
+
 if mpi and mpi_pool.isMaster() and not os.path.exists(pref):
     os.makedirs(pref)
-elif not os.path.exists(pref):
+if not mpi and not os.path.exists(pref):
     os.makedirs(pref)
 
 for pool in sampler.sample(prior, eps):
@@ -72,7 +74,7 @@ for pool in sampler.sample(prior, eps):
         np.savetxt(pref+"/result_"+str(pool.eps)+".csv", pool.thetas, delimiter=",",fmt='%1.5f',comments="")
         with open(pref+"/ratio.txt", "a") as myfile:
             myfile.write(str(pool.t)+","+str(pool.eps)+","+str(pool.ratio)+"\n")
-    else: 
+    if not mpi : 
         print("T:{0},eps:{1:>.4f},ratio:{2:>.4f}".format(pool.t, pool.eps, pool.ratio))
         for i, (mean, std) in enumerate(zip(np.mean(pool.thetas, axis=0), np.std(pool.thetas, axis=0))):
             print(u"    theta[{0}]: {1:>.4f},{2:>.4f}".format(i, mean,std))
