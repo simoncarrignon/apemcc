@@ -33,6 +33,7 @@ class CCSimu(object):
     prodfile=""
     init=""
     rate_depo=1000 #the rate at wish workshop will write their deposit in the outputfile
+    initm={"exterior_diam":{"mean":167.90,"sd":11},"protruding_rim":{"mean":18.30,"sd":5}, "rim_w":{"mean":37.23,"sd": 2.5}, "rim_w_2":{"mean": 31.24,"sd": 4}}
 
     def __init__(self,n_ws,max_time,pref,model,p_mu,p_copy,b_dist,init,dist_list={},outputfile=True,mu_str=[],log=True):
         self.n_ws=n_ws
@@ -46,6 +47,7 @@ class CCSimu(object):
         self.init=init
         self.log=log
         self.ouputfile=outputfile
+        self.initm={"protruding_rim":{"mean":18.30,"sd":5}}
         #if(len(mu_str) < 1) self.mu_str={
 
         if self.log :print('Initialization of the world')
@@ -87,7 +89,7 @@ class CCSimu(object):
              
             for ws in  {"villaseca","belen","malpica","delicias","parlamento"}:
                 dist=10 #this is not use in that case as the "distance" are given by the dictionnary world_dict
-                new_ws= Workshop(ws,dist,{"exterior_diam":{"mean":167.90,"sd":11},"protruding_rim":{"mean":18.30,"sd":5}, "rim_w":{"mean":37.23,"sd": 2.5}, "rim_w_2":{"mean": 31.24,"sd": 4}},100,self.world_lim,log=self.log)
+                new_ws= Workshop(ws,dist,self.initm,100,self.world_lim,log=self.log)
                 self.world[ws]=new_ws
             self.n_ws=len(self.world)
 
@@ -96,7 +98,7 @@ class CCSimu(object):
             for ws in range(self.n_ws):
                 dist=ws
                 wsid='ws_'+str(ws)
-                new_ws= Workshop(wsid,dist,{"exterior_diam":{"mean":167.7+ws,"sd":12.26},"protruding_rim":{"mean":19+ws,"sd":5.6}},10,self.world_lim,log=self.log)
+                new_ws= Workshop(wsid,dist,self.initm,10,self.world_lim,log=self.log)
                 self.world[wsid]=new_ws
             self.maxdist=self.n_ws
             self.mindist=0
