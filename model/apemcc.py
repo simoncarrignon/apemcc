@@ -35,7 +35,7 @@ class CCSimu(object):
     rate_depo=1000 #the rate at wish workshop will write their deposit in the outputfile
     initm={"exterior_diam":{"mean":167.90,"sd":11},"protruding_rim":{"mean":18.30,"sd":5}, "rim_w":{"mean":37.23,"sd": 2.5}, "rim_w_2":{"mean": 31.24,"sd": 4}}
 
-    def __init__(self,n_ws,max_time,pref,model,p_mu,p_copy,b_dist,init,dist_list={},outputfile=True,mu_str=[],log=True):
+    def __init__(self,n_ws,max_time,pref,model,p_mu,p_copy,b_dist,init,dist_list={},outputfile=True,mu_str=[],log=True,prod_rate=10,rate_depo=1000):
         self.n_ws=n_ws
         self.max_time=max_time
         self.pref=pref #us eto classify differetn type of simulation
@@ -47,6 +47,8 @@ class CCSimu(object):
         self.init=init
         self.log=log
         self.ouputfile=outputfile
+        self.prod_rate=prod_rate
+        self.rate_depo=rate_depo
         self.initm={"protruding_rim":{"mean":18.30,"sd":5}}
         #if(len(mu_str) < 1) self.mu_str={
 
@@ -89,7 +91,7 @@ class CCSimu(object):
              
             for ws in  {"villaseca","belen","malpica","delicias","parlamento"}:
                 dist=10 #this is not use in that case as the "distance" are given by the dictionnary world_dict
-                new_ws= Workshop(ws,dist,self.initm,100,self.world_lim,log=self.log)
+                new_ws= Workshop(ws,dist,self.initm,self.prod_rate,self.world_lim,log=self.log)
                 self.world[ws]=new_ws
             self.n_ws=len(self.world)
 
