@@ -21,9 +21,9 @@ def dist(x, y):
     if len(x)<len(y['sd'].keys()):
         return(10000)
     for w in x.keys():
-        allm=x[w].production["rim_w"]
-        realsummary=data['mean'][w]["rim_w"]
-        realsummary=np.mean(allm[len(allm)-10:])
+        allm=x[w].production["protruding_rim"]
+        realsummary=data['mean'][w]["protruding_rim"]
+        realsummary=np.mean(allm[len(allm)-(10*1000):])
         alldist.append(abs(realsummary-np.mean(allm)))
     return np.mean(alldist)
 
@@ -34,7 +34,7 @@ def postfn(theta):
     if(theta[1]>1 or theta[1]<0 or theta[2]<-1 or theta[2]>1):
         return([-10000])
     else:
-        time=int(theta[0])
+        time=30000
         p_mu=theta[1]
         alpha=theta[2]
         ## we fixed the number of time step and we look only at three parameter: posize copy and mutation
@@ -43,8 +43,8 @@ def postfn(theta):
 
 data={'sd':allsds,'mean':allmeans}  #we dont use it in this expe
 
-eps = ExponentialEps(200,100, 0.001)
-prior = TophatPrior([1000,0,-1],[100000,1,1])
+eps = ExponentialEps(200,25, 0.01)
+prior = TophatPrior([1000,0,-1],[30000,0.01,1])
 
 pref=sys.argv[1] #a prefix that will be used as a folder to store the result of the ABC
 #
@@ -56,17 +56,20 @@ sampler = Sampler(N=500, Y=data, postfn=postfn, dist=dist,pool=mpi_pool)
 if mpi_pool.isMaster():
     if not os.path.exists(pref):
         os.makedirs(pref)
-    ##careful this is not very mpi friendly
 
 
 #sampler = Sampler(N=200, Y=data, postfn=postfn, dist=dist)
 
 for pool in sampler.sample(prior, eps):
     if mpi_pool.isMaster():
-        print("T:{0},eps:{1:>.4f},ratio:{2:>.4f}".format(pool.t, pool.eps, pool.ratio))
-        for i, (mean, std) in enumerate(zip(np.mean(pool.thetas, axis=0), np.std(pool.thetas, axis=0))):
-            print(u"    theta[{0}]: {1:>.4f},{2:>.4f}".format(i, mean,std))
-
+        logFile = open(pref+'/general.txt', 'a')
+        logFile.write('starting eps: '+str(pool.eps)+'\n')
+        logFile.close()
+        #print("T:{0},eps:{1:>.4f},ratio:{2:>.4f}".format(pool.t, pool.eps, pool.ratio))
+        #for i, (mean, std) in enumerate(zip(np.mean(pool.thetas, axis=0), np.std(pool.thetas, axis=0))):
+        #    print(u"    theta[{0}]: {1:>.4f},{2:>.4f}".format(i, mean,std))
         np.savetxt(pref+"/result_"+str(pool.eps)+".csv", pool.thetas, delimiter=",",fmt='%1.5f',comments="")
+        with open(pref+"/ratio.txt", "a") as myfile:
+            myfile.write(str(pool.t)+","+str(pool.eps)+","+str(pool.ratio)+"\n")
     #np.savetxt(bias+"/result_"+str(pool.eps)+".csv", pool.thetas, delimiter=",",header="n_agents,time,p_mu,p_copy",fmt='%1.5f',comments="")
 
