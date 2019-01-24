@@ -5,6 +5,7 @@ import sys,os
 
 from model.apemcc import CCSimu
 from data.ceramic import *
+from scipy.stats import ttest_ind_from_stats
 
 
 
@@ -20,11 +21,16 @@ def dist(x, y):
         return(10000)
     for w in x.keys():
         allm=x[w].production["protruding_rim"]
-        realsummary=float(data['mean'][w]["protruding_rim"])
+        realmean=float(data['mean'][w]["protruding_rim"])
+        realsd=float(data['sd'][w]["protruding_rim"])
+        realsize=samplesize[w]
         sample=min(100,len(allm))
         lastm=allm[-sample:]
-        meanlastm=np.mean(lastm)
-        alldist.append(abs(realsummary-meanlastm))
+        simumean=np.mean(lastm)
+        simusd=np.std(lastm)
+        simusize=sample
+        t,p=ttest_ind_from_stats(realmean,realsd,realsize,simumean,simusd,simusize,equal_var=False)
+        alldist.append(1-p)
     return np.mean(alldist)
 
 #our "model", a gaussian with varying means
