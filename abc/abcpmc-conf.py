@@ -31,26 +31,30 @@ def dist(x, y):
         simusize=sample
         t,p=ttest_ind_from_stats(realmean,realsd,realsize,simumean,simusd,simusize,equal_var=False)
         alldist.append(1-p)
+    print( np.mean(alldist))
     return np.mean(alldist)
 
 #our "model", a gaussian with varying means
 def postfn(theta):
     # we reject the particul with no credible parameters (ie pop < 0 etc...)
     #if(theta[0]>1 or theta[1]<0 or theta[1]>1 or theta[0]<0):
-    if(theta[0]>1 or theta[0]<0 or theta[1]<-1 or theta[1]>1):
+    if(theta[0]>1 or theta[0]<0 or theta[1]<-1 or theta[1]>1 or theta[2] <0 or theta[3]<1 or theta[4]<1):
         return([-10000])
     else:
-        time=30000
+        time=int(theta[2])
         p_mu=theta[0]
         alpha=theta[1]
+        prod_rate=int(theta[3])
+        rate_depo=int(theta[4])
         ## we fixed the number of time step and we look only at three parameter: posize copy and mutation
-        exp=CCSimu(-1,time,pref,-1,p_mu,0,alpha,"file",dist_list=realdist,outputfile=False,mu_str=realsd,log=False)
+        exp=CCSimu(-1,time,pref,-1,p_mu,0,alpha,"file",dist_list=realdist,outputfile=False,mu_str=realsd,log=False,prod_rate=prod_rate,rate_depo=rate_depo)
         return exp.run()
 
 data={'sd':allsds,'mean':allmeans}  #we dont use it in this expe
 
-eps = ExponentialEps(200,1, 0.01)
-prior = TophatPrior([0,-1],[1,1])
+eps = ExponentialEps(200,1, 0.5)
+#prior = TophatPrior([0,-1],[1,1])
+prior = TophatPrior([0,-1,100,10,100],[1,1,10000,100,2000])
 
 pref=sys.argv[1] #a prefix that will be used as a folder to store the result of the ABC
 mpi=bool(sys.argv[2])
@@ -58,12 +62,13 @@ mpi=bool(sys.argv[2])
 ### if use with MPI
 if mpi : from  mpi_util import *
 
+N=200
 #
 if mpi:
     mpi_pool = MpiPool()
-    sampler = Sampler(N=200, Y=data, postfn=postfn, dist=dist,pool=mpi_pool) 
+    sampler = Sampler(N=N, Y=data, postfn=postfn, dist=dist,pool=mpi_pool) 
 else:
-    sampler = Sampler(N=200, Y=data, postfn=postfn, dist=dist)
+    sampler = Sampler(N=N, Y=data, postfn=postfn, dist=dist)
 
 sampler.particle_proposal_cls = OLCMParticleProposal
 
