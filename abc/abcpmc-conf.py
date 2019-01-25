@@ -30,10 +30,9 @@ def dist(x, y):
 
 #our "model", a gaussian with varying means
 def postfn(theta):
-    print(theta)
     # we reject the particul with no credible parameters (ie pop < 0 etc...)
     #if(theta[0]>1 or theta[1]<0 or theta[1]>1 or theta[0]<0):
-    if(theta[0]>1 or theta[3]<=0 or theta[0]<0 or theta[1]<-1 or theta[1]>1 or theta[2] <15000  or theta[3]<1 or theta[4]>theta[2] or (theta[2] * theta[3])< 100000):
+    if(theta[0]>1 or theta[0]<0  or theta[3]<1  or theta[1]<-1 or theta[1]>1 or theta[2] <15000  or theta[3]<1 or theta[4]<1 or theta[4]>theta[2] or (theta[2] * theta[3])< 100000):
         return([-10000])
     else:
         p_mu=theta[0]
@@ -41,6 +40,7 @@ def postfn(theta):
         time=int(theta[2])
         prod_rate=int(theta[3])
         rate_depo=int(theta[4])
+        if(rate_depo==0):print("FUK DAT")
         ## we fixed the number of time step and we look only at three parameter: posize copy and mutation
         exp=CCSimu(-1,time,pref,-1,p_mu,0,alpha,"file",dist_list=realdist,outputfile=False,mu_str=realsd,log=False,prod_rate=prod_rate,rate_depo=rate_depo)
         return exp.run()
