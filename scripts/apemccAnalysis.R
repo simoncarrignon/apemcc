@@ -605,9 +605,9 @@ getRealData <- function(emp){
     return(res)
 }
 
-getRealMeasurment <- function(datafile="../data/drespaper.csv") {
+getRealMeasurment <- function(datafile="../data/dataDressel.csv") {
     res=read.csv(datafile)
-    res=res[ res$type %in% c("Dressel C","Dressel D","Dressel E") ,]
+    #res=res[ res$type %in% c("Dressel D","Dressel E") ,]
     res
 }
 
@@ -617,6 +617,7 @@ getSummaryStatistics <- function(emp,stat=mean){
 
 write.csv(file="../data/mean_allmeasurment.csv",getSummaryStatistics(getRealMeasurment(),mean))
 write.csv(file="../data/sd_allmeasurment.csv",getSummaryStatistics(getRealMeasurment(),sd))
+write.csv(file="../data/length_allmeasurment.csv",table(getRealMeasurment()$site))
     #' getAllSimulationFromFolder
     #'
     #' get all tthe subfolder of a folder
