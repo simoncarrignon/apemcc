@@ -32,7 +32,7 @@ def dist(x, y):
 def postfn(theta):
     # we reject the particul with no credible parameters (ie pop < 0 etc...)
     #if(theta[0]>1 or theta[1]<0 or theta[1]>1 or theta[0]<0):
-    if(theta[0]>1 or theta[0]<0 or theta[1]<-1 or theta[1]>1 or theta[2] <15000  or theta[3]<1 or theta[4]<theta[2] or theta[2] * theta[3]> 100000):
+    if(theta[0]>1 or theta[0]<0 or theta[1]<-1 or theta[1]>1 or theta[2] <15000  or theta[3]<1 or theta[4]>theta[2] or (theta[2] * theta[3] ) < 100000):
         return([-10000])
     else:
         time=int(theta[2])
