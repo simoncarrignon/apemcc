@@ -32,7 +32,7 @@ def dist(x, y):
 def postfn(theta):
     # we reject the particul with no credible parameters (ie pop < 0 etc...)
     #if(theta[0]>1 or theta[1]<0 or theta[1]>1 or theta[0]<0):
-    if(theta[0]>1 or theta[0]<0 or theta[1]<-1 or theta[1]>1 or theta[2] <0 or theta[3]<1 or theta[4]<1):
+    if(theta[0]>1 or theta[0]<0 or theta[1]<-1 or theta[1]>1 or theta[2] <1 or theta[3]<1 or theta[4]<theta[2]):
         return([-10000])
     else:
         time=int(theta[2])
@@ -46,8 +46,8 @@ def postfn(theta):
 
 data={'sd':allsds,'mean':allmeans}  
 
-eps = ExponentialEps(100,1, 0.1)
-prior = TophatPrior([0,-1,100,10,100],[1,1,10000,100,2000])
+eps = ExponentialEps(100,1, 0.01)
+prior = TophatPrior([0,-1,100,10,1000],[1,1,5000,80,3000])
 
 pref=sys.argv[1] #a prefix that will be used as a folder to store the result of the ABC
 mpi=bool(sys.argv[2])
@@ -61,7 +61,7 @@ if mpi:
     mpi_pool = MpiPool()
     sampler = Sampler(N=N, Y=data, postfn=postfn, dist=dist,pool=mpi_pool) 
 else:
-    sampler = Sampler(N=N, Y=data, postfn=postfn, dist=dist,threads)
+    sampler = Sampler(N=N, Y=data, postfn=postfn, dist=dist)
 
 sampler.particle_proposal_cls = OLCMParticleProposal
 
@@ -79,9 +79,6 @@ elif not mpi:
 
 for pool in sampler.sample(prior, eps):
     if mpi  and mpi_pool.isMaster() :
-        logFile = open(pref+'/general.txt', 'a')
-        logFile.write('starting eps: '+str(pool.eps)+'\n')
-        logFile.close()
         with open(pref+"/ratio.txt", "a") as myfile:
             myfile.write(str(pool.t)+","+str(pool.eps)+","+str(pool.ratio)+"\n")
     if not mpi : 
