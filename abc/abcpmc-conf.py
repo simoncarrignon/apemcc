@@ -30,14 +30,15 @@ def dist(x, y):
 
 #our "model", a gaussian with varying means
 def postfn(theta):
+    print(theta)
     # we reject the particul with no credible parameters (ie pop < 0 etc...)
     #if(theta[0]>1 or theta[1]<0 or theta[1]>1 or theta[0]<0):
-    if(theta[0]>1 or theta[2]<=0 or theta[0]<0 or theta[1]<-1 or theta[1]>1 or theta[2] <15000  or theta[3]<1 or theta[4]<theta[2] or theta[2] * theta[3]< 100000):
+    if(theta[0]>1 or theta[3]<=0 or theta[0]<0 or theta[1]<-1 or theta[1]>1 or theta[2] <15000  or theta[3]<1 or theta[4]>theta[2] or (theta[2] * theta[3])< 100000):
         return([-10000])
     else:
-        time=int(theta[2])
         p_mu=theta[0]
         alpha=theta[1]
+        time=int(theta[2])
         prod_rate=int(theta[3])
         rate_depo=int(theta[4])
         ## we fixed the number of time step and we look only at three parameter: posize copy and mutation
