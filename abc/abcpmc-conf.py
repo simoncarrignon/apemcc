@@ -32,7 +32,7 @@ def dist(x, y):
 def postfn(theta):
     # we reject the particul with no credible parameters (ie pop < 0 etc...)
     #if(theta[0]>1 or theta[1]<0 or theta[1]>1 or theta[0]<0):
-    if(theta[0]>1 or theta[0]<0 or theta[1]<-1 or theta[1]>1 or theta[2] <1 or theta[3]<1 or theta[4]<theta[2]):
+    if(theta[0]>1 or theta[0]<0 or theta[1]<-1 or theta[1]>1 or theta[2] <15000  or theta[3]<1 or theta[4]<theta[2] or theta[2] * theta[3]> 100000):
         return([-10000])
     else:
         time=int(theta[2])
@@ -47,7 +47,7 @@ def postfn(theta):
 data={'sd':allsds,'mean':allmeans}  
 
 eps = ExponentialEps(100,1, 0.01)
-prior = TophatPrior([0,-1,100,10,1000],[1,1,5000,80,3000])
+prior = TophatPrior([0,-1,15000,10,100],[1,1,45000,80,10000])
 
 pref=sys.argv[1] #a prefix that will be used as a folder to store the result of the ABC
 mpi=bool(sys.argv[2])
@@ -55,7 +55,7 @@ mpi=bool(sys.argv[2])
 ### if use with MPI
 if mpi : from  mpi_util import *
 
-N=1000
+N=500
 #
 if mpi:
     mpi_pool = MpiPool()
