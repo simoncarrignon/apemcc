@@ -103,17 +103,29 @@ ln -s abcpmc/abcpmc/*.py . #this suppose abmpc is cloned in the folder `abc/`
 
 (obviously those random ln could be done better with a better handling of python modules...)
 
-### Run one experiment:
+### Run ABC :
 
 One this is done we can run the wrapper of the jakeret module `abc/abcpmc-conf.py`
 
 ```bash
-python abc/abcpmc-conf.py bias
+python abcpmc-conf.py foldername 0
 ```
 
-Where `bias` has  here two function : it is the prefix that will use to create a folder where the result of the ABC will be stored and it tell `ConformitySimu()` the bias to be used during the simulation. Thus for the current experiments the string `bias` should be one of:  ["neutral","anti","conf"]
+* `foldername` it is the prefix that will use to create a folder where the result of the ABC will be stored.
+* `0` to say you don't want to use mpi. 
+
+to use mpi just do then:
+
+```bash
+mpirun -n 4 python abcpmc-conf.py foldername 1 #run abc with mpi using 4 instances
+```
+
+__Be careful that I am not sure why but the MPI version doesn't work with python3__
+
+### Some notes
 
 By default the step of the ABC will 5 step from 1 to 0.115, with some preselected prior. To change that one should modify this in `abc/abcpmc-conf.py`:
+
 ```python
 eps = LinearEps(5, 1, 0.115)
 prior = TophatPrior([10,100,0,0],[1000,1000,1,1])
@@ -126,18 +138,6 @@ sampler = Sampler(N=100, Y=data, postfn=postfn, dist=dist)
 
 ```
 
-
-If nothing is change from the default value one can then run 3 abc for the 3 different bias by doing (from the folder `abc/`)
-```bash
-for bias in neutral anti conf;
-do
-    python abcpmc-conf.py 
-done
-```
-
-__Warning__ : this may take a few seconds/minutes.
-
-
 With 5 file in each. Each file contains a csv.The rows represent each selected particles (simulation) for this step of the ABC. The columns correspond to the parameters of the selected simulations.
 
 ### Analyse the results
@@ -148,8 +148,3 @@ But a simple R script come with the repo that allow to quickly output the main r
 ln ../script/*.R .
 Rscript draft.R
 ```
-
-With the default value  of the ABC as set in `abcpmc-conf.py`, those results are meaningless. More particles should be selected, the smallest epsilon should be smaller and the prior ranges should be wider. 
-
-To be able to do so, `MPI` is almost mandatory. Scripts using mpi can easily be run in Marenostrun using the SLURM job file:  `abc/generic_mnjob.job`. 
-At the same time the python mpi module has to be imported and the call to `sampler` has to be slightly adapted. Both thing should be in the `model/*.py` files in commented lines of code.
