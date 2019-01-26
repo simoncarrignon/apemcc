@@ -148,3 +148,62 @@ But a simple R script come with the repo that allow to quickly output the main r
 ln ../script/*.R .
 Rscript draft.R
 ```
+
+#### abctools:
+This 'packages' that so far is more a colelction of chunk of code is usefull and countain priceless stuff that should be cleaned and reorganized.
+
+to use it:
+
+```bash
+ln -s ../../../dev/abc-pandora/abctools.R .
+```
+ and in R file:
+
+```R
+source("abctools.R")
+```
+
+Though all this may change.
+
+If you have run the ABC using for exemple:
+```bash
+mpirun -n 4 python abcpmc-conf.py foldername 1 #run abc with mpi using 4 instances
+```
+
+
+you can then use:
+
+```R
+plotAllDensities(getlistParticlesFromPath(foldername))
+```
+
+to generate a quick output of the whole ABC process that will give you someething like this:
+
+![Plot the ABC](doc/images/exemplePlotAllDensities.png)
+
+
+`listres=getlistParticlesFromPath(foldername)`  return a list of the selected aprticules for each epsilon and you can easily select the 'best' and the prior:
+
+```R
+posteriors=listres[[length(listres)]]
+prior=listres[[1]]
+plot2dens(A=posteriors$p_mu, prior=prior$p_mu) 
+```
+
+![Posterior vs prior](doc/images/exemplePlot2dens.png)
+
+
+and check all:
+
+```R
+param=colnames(posteriors)
+par(mfrow=c(3,2))
+lapply(param,function(p)plot2dens(A=posteriors[[p]], prior=prior[[p]],main=p))
+```
+
+
+
+
+
+
+
