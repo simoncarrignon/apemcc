@@ -147,7 +147,11 @@ class CCSimu(object):
         for t in range(0,self.max_time,1):  
             for i in self.world.keys() :
                 ws=self.world[i]
-                if( t%self.rate_depo ==0): 
+                
+                if( self.rate_depo == 0 ):
+                    ws.produce(t,self.prodfile)
+                    print("should not be possible")
+                elif( t%self.rate_depo ==0):  
                     ws.produce(t,self.prodfile)
                 if( random.random()< self.p_mu):
                     ws.mutate(self.mu_str)
