@@ -201,6 +201,7 @@ par(mfrow=c(3,2))
 lapply(param,function(p)plot2dens(A=posteriors[[p]], prior=prior[[p]],main=p))
 ```
 
+![all posteriors](doc/images/exempleAllposteriors.png)
 
 
 
