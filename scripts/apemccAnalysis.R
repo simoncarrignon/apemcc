@@ -414,24 +414,33 @@ limitTimeStep<-function(data,timelist){
 
 ##This function take a table with the variations of the mean size between workshop and a list of different model names and plot density plot ggplot style (take from ABC plot used with model CEEC)
 plotDensities <- function(datas,epsilon,...){
-    htcol=heat.colors(length(epsilon),alpha=1)
-    names(htcol)=epsilon
+    #this define a color for each epsilon. In the cas of the 3 model expeimrent it will define a color for each model
     htcolF=heat.colors(length(epsilon),alpha=.5)
     names(htcolF)=epsilon
+
+    #this define the limit of the distribution
     from=0
     to=max(datas)
+
+    #this calcualte the pdf using kernel estimation for all model
     densities=lapply(colnames(datas),function(i){density(datas[,i],from=from,to=to)})
     names(densities)=colnames(datas)
+
+    #here we calcualte the final range of the graph to have a nice figure
     rangex=range(lapply(densities,function(i)range(i$x)))
     rangey=range(lapply(densities,function(i)range(i$y)))
+
+    #here we reduce some useless margin
     par(mar=c(5,5,1,1))
+
+    #we plot a first empty graph upon whihc the distribution will be plot
     plot(density(datas),xlim=rangex,ylim=rangey,type="n",xlab="Variation of the mean size per workshop",...)
     lapply(seq_along(densities),function(i){
-	   polygon(c(0,densities[[i]]$x,to),c(0,densities[[i]]$y,0),col=htcolF[names(densities)[i]],lwd=2)#,density=20,angle=45*i,border=htcol[names(densities)[i]])
-	   #polygon(densities[[i]],col=htcolF[names(densities)[i]],lwd=2)#,density=20,angle=45*i,border=htcol[names(densities)[i]])
-	   #	   abline(v=mean(densities[[i]]$x),col=htcol[names(densities)[i]])
-	   #	   text(mean(densities[[i]]$x),0,names(densities)[i],col=htcol[names(densities)[i]])
-		 })
+           #this is what is drawing the three curves:
+           polygon(c(0,densities[[i]]$x,to),c(0,densities[[i]]$y,0),col=htcolF[names(densities)[i]],lwd=2)
+         })
+
+    #had a legend
     legend("topright",legend=epsilon,fill=htcolF,title="model")
 }
 
