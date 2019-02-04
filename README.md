@@ -3,23 +3,24 @@ Amphora Production, an Evolutionary model of culture change
 
 
 ## Basic  Usage:
+
+### Run an experiment
+
 If you want to run just one simulation you need to use `main.py` and give to this script the good argument:
 
-### run
-
 ```bash
-python model/main.py -w <number of Workshop> -t <time> -f <outputfile> -m <model> -i <init> -a <alpha>
+python main.py -w <number of Workshop> -t <time> -f <outputfile> -m <model> -i <init> -a <alpha>
 ```
 
 * `time` is the total number of time step of the simulation 
 * `init` should be in `{"art","file"}`
 * `model` should be in `{"HT","HTD","VT"}`
-* `outputfile` wille be use to write and store the results of the model
+* `outputfile` will be use to write and store the results of the model
 * `alha` new gradual bias (-1 = HT, .5 = HTD, 1 = VT)
 
 If `-i file` is used `-w` is not use
 
-### analyse
+### Analyse the output of the experiment (with R)
 If you use let say:
 
 ```bash
@@ -27,10 +28,17 @@ python main.py -w 10 -t 10000 -f singletest -m HT -i "art" -a 10
 ```
 
 the model will create a file: `singletest_N10.csv` and you can analyse it with R and some of the tools available in 
-* `scripts/apemccAnalysis.R`  
-* `scripts/testBetaFunction.R`  
+* `scripts/apemccAnalysis.R` : collection of function
+* `scripts/testBetaFunction.R` : collection of various section
 
-For exemple to see how the exterior rim change between workshops:
+In order to  load all functions in the script `apemccAnalysis.R` you can do, from within a R console started inside the folder `script/`:
+
+```R
+source("apemccAnalysis.R")
+```
+Don't do that with `testBetaFunction.R` as it is not expected to be loaded this way.
+
+To see how the exterior rim change between workshops:
 ```R
 model=read.csv("../singletest_N10.csv")  
 boxplot(model$exterior_diam ~ model$dist,ylab="exterior_rim",xlab="workshop",xaxt="n")
@@ -67,7 +75,7 @@ A manual way to do that is set in `YSLR_man` function, which correspond to the f
 A quick way to plot all the result :
 
 ```R
-listsubexpe=list.dirs("awewer/",recursive=F)
+listsubexpe=list.dirs(store_expe,recursive=F)
 names(listsubexpe)=basename(listsubexpe) 
 allresults=lapply(listsubexpe,readFolder)
 plotDensities(sapply(lapply(lapply(allresults,getIt),as.data.frame),varSim,vari),epsilon=names(allresults))
